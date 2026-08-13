@@ -376,6 +376,39 @@ select option{background:var(--paper);color:var(--ink)}
  .mode button:last-child{border-bottom:0}
  .meal{padding:12px}
 }
+
+/* ---------- dark mode form controls ---------- */
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select{
+  background:var(--paper-2);
+  color:var(--ink);
+  border-color:var(--line-strong);
+  caret-color:var(--ink);
+  color-scheme:dark;
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder{
+  color:var(--ink-45);
+  opacity:1;
+}
+
+html[data-theme="dark"] select option{
+  background:var(--paper-2);
+  color:var(--ink);
+}
+
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] textarea:focus,
+html[data-theme="dark"] select:focus{
+  background:var(--paper-2);
+  color:var(--ink);
+  border-color:var(--ink);
+  outline:2px solid var(--line-strong);
+  outline-offset:1px;
+}
+
 </style>
 </head>
 <body>
