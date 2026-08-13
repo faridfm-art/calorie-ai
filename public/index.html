@@ -756,6 +756,105 @@ button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
 .theme-btn:active{transform:scale(.92)}
 .theme-btn.active{box-shadow:0 0 0 1px var(--ink)}
 
+
+/* ---------- profile calculator guide ---------- */
+.profile-guide{
+  margin:0 0 18px;
+  padding:14px 16px;
+  border-left:3px solid var(--ink);
+  background:var(--paper-2);
+}
+.profile-guide b{
+  display:block;
+  font-family:var(--display);
+  font-size:16px;
+  margin-bottom:5px;
+}
+.profile-guide p{
+  margin:0;
+  color:var(--ink-70);
+  font-size:12.5px;
+  line-height:1.6;
+}
+.settings-actions .secondary-btn,
+.settings-actions .add-btn{
+  min-height:42px;
+}
+#calculateRecommendation{
+  transition:transform .18s cubic-bezier(.22,1,.36,1),background-color .18s ease,color .18s ease,box-shadow .18s ease;
+}
+#calculateRecommendation:hover{
+  transform:translateY(-2px);
+  box-shadow:2px 2px 0 var(--ink-45);
+}
+#calculateRecommendation:active{
+  transform:scale(.97);
+}
+#recommendationNote{
+  padding-top:3px;
+}
+
+
+/* ---------- activity explanation ---------- */
+.activity-help{
+  margin-top:7px;
+  padding:9px 10px;
+  border-left:2px solid var(--ink);
+  background:var(--paper-2);
+  font-size:11px;
+  line-height:1.45;
+}
+.activity-help strong{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.6px;text-transform:uppercase}
+.activity-help span{display:block;margin-top:2px;color:var(--ink-45)}
+.activity-guide{
+  margin-top:16px;
+  padding:14px;
+  border:1px dashed var(--line-strong);
+  background:var(--paper);
+}
+.activity-guide>b{
+  display:block;
+  font-family:var(--mono);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1.3px;
+  margin-bottom:10px;
+}
+.activity-guide-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+.activity-guide-grid>div{
+  padding:10px;
+  border:1px solid var(--line);
+  background:var(--paper-2);
+}
+.activity-guide-grid strong{
+  display:block;
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+}
+.activity-guide-grid span{
+  display:block;
+  margin-top:4px;
+  font-size:11px;
+  line-height:1.45;
+  color:var(--ink-45);
+}
+.activity-guide small{
+  display:block;
+  margin-top:10px;
+  color:var(--ink-45);
+  font-size:10px;
+  line-height:1.45;
+}
+@media(max-width:560px){
+  .activity-guide-grid{grid-template-columns:1fr}
+}
+
 </style>
 
 <body>
@@ -782,11 +881,11 @@ button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
       <button data-page="stats">
         <span class="ic">▥</span><span>Statistik</span>
       </button>
-      <button data-page="profile">
-        <span class="ic">◎</span><span>Profil & Target</span>
-      </button>
       <button data-page="workout">
         <span class="ic">✓</span><span>Latihan</span>
+      </button>
+      <button data-page="profile">
+        <span class="ic">◎</span><span>Profil & Target</span>
       </button>
     </nav>
 
@@ -937,20 +1036,39 @@ button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
     <!-- PROFILE -->
     <section class="page" id="page-profile">
       <div class="card pad">
-        <div class="card-title"><h2>Profil & target kalori</h2><span class="tag">Pengaturan</span></div>
+        <div class="card-title"><h2>Profil & target kalori</h2><span class="tag">Kalkulator</span></div>
+        <div class="profile-guide">
+          <b>Hitung rekomendasi kalori</b>
+          <p>Isi berat, tinggi, dan usia. Pilih tingkat aktivitas serta tujuanmu, lalu tekan <strong>Hitung Rekomendasi</strong>. Nilai BMR, TDEE, target kalori, protein, dan lemak akan dihitung otomatis.</p>
+        </div>
         <form id="profileForm">
           <div class="settings-grid">
             <div><label for="profileWeight">Berat (kg)</label><input id="profileWeight" type="number" min="1" step=".1" value="86"></div>
             <div><label for="profileHeight">Tinggi (cm)</label><input id="profileHeight" type="number" min="1" step="1" value="170"></div>
             <div><label for="profileAge">Usia</label><input id="profileAge" type="number" min="1" step="1" value="24"></div>
-            <div><label for="profileActivity">Aktivitas</label>
+            <div>
+              <label for="profileActivity">Aktivitas harian</label>
               <select id="profileActivity">
-                <option value="1.2">Sedentary — 1.2</option>
-                <option value="1.375">Light — 1.375</option>
-                <option value="1.55" selected>Moderate — 1.55</option>
-                <option value="1.725">High — 1.725</option>
+                <option value="1.2">Sedentary — sangat rendah</option>
+                <option value="1.375">Light — ringan</option>
+                <option value="1.55" selected>Moderate — sedang</option>
+                <option value="1.725">High — tinggi</option>
               </select>
+              <div class="activity-help" id="activityHelp">
+                <strong>Moderate — sedang</strong>
+                <span>Olahraga sekitar 3–5 hari per minggu, atau aktivitas harian cukup aktif.</span>
+              </div>
             </div>
+          </div>
+          <div class="activity-guide">
+            <b>Patokan aktivitas</b>
+            <div class="activity-guide-grid">
+              <div><strong>Sedentary</strong><span>Jarang olahraga, sebagian besar waktu duduk. Contoh: kerja di depan komputer dan aktivitas harian minim.</span></div>
+              <div><strong>Light</strong><span>Aktivitas ringan atau olahraga sekitar 1–3 hari per minggu. Contoh: banyak jalan santai atau latihan ringan.</span></div>
+              <div><strong>Moderate</strong><span>Olahraga sekitar 3–5 hari per minggu atau aktivitas harian cukup aktif.</span></div>
+              <div><strong>High</strong><span>Olahraga berat sekitar 6–7 hari per minggu atau pekerjaan yang banyak bergerak secara fisik.</span></div>
+            </div>
+            <small>Pilih berdasarkan gabungan aktivitas harian dan olahraga rutin, bukan hanya jumlah hari gym.</small>
           </div>
           <div class="settings-section">
             <label>Target</label>
@@ -966,12 +1084,16 @@ button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
               <div><span class="muted">TDEE</span><div class="settings-number" id="tdeeValue">—</div></div>
             </div>
             <div class="recommendation">
-              <div class="macro"><b id="recommendedKcal">—</b><span>Target kcal</span></div>
-              <div class="macro"><b id="recommendedProtein">—</b><span>Protein</span></div>
-              <div class="macro"><b id="recommendedFat">—</b><span>Lemak</span></div>
+              <div class="macro"><b id="recommendedKcal">—</b><span>Target kcal / hari</span></div>
+              <div class="macro"><b id="recommendedProtein">—</b><span>Protein / hari</span></div>
+              <div class="macro"><b id="recommendedFat">—</b><span>Lemak / hari</span></div>
             </div>
+            <div class="settings-note" id="recommendationNote">Masukkan data profil lalu tekan <strong>Hitung Rekomendasi</strong> untuk melihat kebutuhan harianmu.</div>
           </div>
-          <div class="settings-actions"><button class="add-btn" type="submit">Simpan profil</button></div>
+          <div class="settings-actions">
+            <button class="secondary-btn" type="button" id="calculateRecommendation">Hitung Rekomendasi</button>
+            <button class="add-btn" type="submit">Simpan profil</button>
+          </div>
         </form>
       </div>
     </section>
@@ -1296,6 +1418,32 @@ function renderStats(){
       <span class="day-label">${x.label}</span>
     </div>`).join("");
 }
+const activityDescriptions={
+  "1.2":{
+    title:"Sedentary — sangat rendah",
+    text:"Jarang olahraga, sebagian besar waktu duduk. Contoh: kerja di depan komputer dan aktivitas harian minim."
+  },
+  "1.375":{
+    title:"Light — ringan",
+    text:"Aktivitas ringan atau olahraga sekitar 1–3 hari per minggu. Contoh: banyak jalan santai atau latihan ringan."
+  },
+  "1.55":{
+    title:"Moderate — sedang",
+    text:"Olahraga sekitar 3–5 hari per minggu atau aktivitas harian cukup aktif."
+  },
+  "1.725":{
+    title:"High — tinggi",
+    text:"Olahraga berat sekitar 6–7 hari per minggu atau pekerjaan yang banyak bergerak secara fisik."
+  }
+};
+function updateActivityHelp(){
+  const value=$("#profileActivity").value;
+  const info=activityDescriptions[value]||activityDescriptions["1.55"];
+  $("#activityHelp").innerHTML=`<strong>${info.title}</strong><span>${info.text}</span>`;
+}
+$("#profileActivity").addEventListener("change",updateActivityHelp);
+updateActivityHelp();
+
 function calcProfile(){
   const w=+$("#profileWeight").value||86,h=+$("#profileHeight").value||170,a=+$("#profileAge").value||24,act=+$("#profileActivity").value||1.55;
   const bmr=10*w+6.25*h-5*a+5, tdee=bmr*act;
@@ -1309,6 +1457,10 @@ function calcProfile(){
   $("#recommendedKcal").textContent=profile.target.toLocaleString("id-ID");
   $("#recommendedProtein").textContent=Math.round(w*1.8)+" g";
   $("#recommendedFat").textContent=Math.round(w*.7)+" g";
+  const goalText=profile.goal==="loss"?"defisit sekitar 500 kcal untuk membantu penurunan berat badan":
+                  profile.goal==="gain"?"surplus sekitar 250 kcal untuk mendukung kenaikan berat badan":
+                  "asupan sekitar TDEE untuk mempertahankan berat badan";
+  $("#recommendationNote").innerHTML=`Rekomendasi ini menggunakan BMR × faktor aktivitas. Untuk tujuan <strong>${profile.goal==="loss"?"Turun":profile.goal==="gain"?"Naik":"Maintain"}</strong>, aplikasi memakai ${goalText}.`;
 }
 function renderProfile(){
   $("#profileWeight").value=profile.weight;
@@ -1449,6 +1601,10 @@ $$(".target-option").forEach(b=>b.addEventListener("click",()=>{
   $$(".target-option").forEach(x=>x.classList.toggle("active",x===b));
   calcProfile();
 }));
+$("#calculateRecommendation").onclick=()=>{
+  calcProfile();
+  toast("Rekomendasi kalori berhasil dihitung.");
+};
 $("#profileForm").addEventListener("submit",e=>{
   e.preventDefault();
   profile.weight=+$("#profileWeight").value||86;
