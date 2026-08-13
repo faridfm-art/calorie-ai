@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
 <style>
+
 :root{
   /* ---- Dapur Data: monochrome kitchen ledger — carbon ink on receipt paper ---- */
   --ink:#141210;
@@ -55,14 +56,32 @@ html[data-theme="dark"]{
 }
 html,body{transition: background-color .25s ease, color .25s ease}
 
-/* ---- animasi perpindahan mode: tinta menyebar dari tombol yang ditekan ---- */
-::view-transition-old(root),
-::view-transition-new(root){
-  animation:none;
-  mix-blend-mode:normal;
+/* ---- animated light/dark mode transition ---- */
+::view-transition-group(root){
+  animation-duration:.72s;
+  animation-timing-function:cubic-bezier(.22,1,.36,1);
 }
-::view-transition-old(root){ z-index:1 }
-::view-transition-new(root){ z-index:2 }
+::view-transition-old(root){
+  animation:none;
+  z-index:1;
+}
+::view-transition-new(root){
+  z-index:2;
+  animation:theme-reveal .72s cubic-bezier(.22,1,.36,1) both;
+  clip-path:circle(0px at var(--theme-x,50vw) var(--theme-y,50vh));
+}
+@keyframes theme-reveal{
+  to{
+    clip-path:circle(150vmax at var(--theme-x,50vw) var(--theme-y,50vh));
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root){
+    animation:none!important;
+  }
+}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion: reduce){
@@ -409,893 +428,1046 @@ html[data-theme="dark"] select:focus{
   outline-offset:1px;
 }
 
-
-/* ---------- workout schedule ---------- */
-.workout-week{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:18px 0}
-.workout-day-btn{
-  border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);
-  padding:10px 5px;cursor:pointer;font-family:var(--mono);font-size:10px;
-  text-transform:uppercase;letter-spacing:.5px;transition:.18s ease;
-}
-.workout-day-btn:hover,.workout-day-btn.active{background:var(--ink);color:var(--paper)}
-.workout-day-btn.today{box-shadow:inset 0 -3px 0 var(--ink)}
-.workout-day-btn.active.today{box-shadow:inset 0 -3px 0 var(--paper)}
-
-.workout-head{
-  display:flex;justify-content:space-between;align-items:flex-start;gap:15px;
-  border-bottom:1.5px solid var(--ink);padding-bottom:16px
-}
-.workout-kicker{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--ink-45)}
-.workout-title{font-family:var(--display);font-size:28px;margin:5px 0 2px}
-.workout-subtitle{margin:0;color:var(--ink-45);font-size:13px;line-height:1.5}
-.workout-progress{text-align:right;font-family:var(--mono);font-size:12px;min-width:100px}
-.workout-progress strong{display:block;font-size:24px;color:var(--ink)}
-.workout-progress span{color:var(--ink-45)}
-
-.workout-list{display:grid;gap:0;margin-top:15px}
-.workout-row{
-  display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;
-  padding:14px 3px;border-bottom:1px dashed var(--line-strong);
-}
-.workout-row:last-child{border-bottom:0}
-.workout-check{
-  width:23px;height:23px;accent-color:var(--ink);cursor:pointer;
-}
-.workout-exercise{font-weight:800;font-size:13px;line-height:1.4}
-.workout-exercise small{
-  display:block;margin-top:3px;font-family:var(--mono);font-size:10px;
-  color:var(--ink-45);font-weight:600
-}
-.workout-row.done .workout-exercise{text-decoration:line-through;opacity:.48}
-.workout-reps{
-  font-family:var(--mono);font-size:11px;font-weight:800;
-  border:1px solid var(--line-strong);padding:7px 9px;white-space:nowrap
-}
-.workout-rest{
-  margin-top:18px;padding:20px;border:1.5px dashed var(--ink);
-  background:var(--paper-2);text-align:center
-}
-.workout-rest strong{font-family:var(--display);font-size:24px;display:block;margin-bottom:5px}
-.workout-rest span{font-size:12px;color:var(--ink-45)}
-.workout-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
-.workout-btn{
-  border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);
-  padding:10px 14px;font-family:var(--mono);font-size:11px;font-weight:800;cursor:pointer
-}
-.workout-btn:hover{background:var(--ink);color:var(--paper)}
-.workout-note{
-  margin-top:16px;padding:13px 15px;border-left:3px solid var(--ink);
-  background:var(--paper-2);font-size:12px;line-height:1.55;color:var(--ink-45)
-}
-@media(max-width:700px){
-  .workout-week{grid-template-columns:repeat(4,1fr)}
-  .workout-head{flex-direction:column}
-  .workout-progress{text-align:left}
-}
+/* ---------- missing runtime/layout helpers ---------- */
+.workout-list{display:grid;gap:9px}
+.workout-day{margin-top:22px}
+.workout-day:first-child{margin-top:0}
+.workout-day-title{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 8px;color:var(--ink-45)}
+.workout-row{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--ink);background:var(--paper);transition:.18s}
+.workout-row.done{opacity:.55;text-decoration:line-through}
+.workout-row input{width:18px;height:18px;accent-color:var(--ink);flex:none}
+.workout-name{font-family:var(--display);font-weight:600;flex:1}
+.workout-meta{font-family:var(--mono);font-size:10px;color:var(--ink-45);white-space:nowrap}
+.workout-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.workout-progress{font-family:var(--mono);font-weight:700}
+button.secondary-btn{border:1px solid var(--ink);background:transparent;color:var(--ink);padding:9px 12px;font-weight:700}
+button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
+.notice{padding:12px 14px;border:1px dashed var(--line-strong);font-size:12px;line-height:1.55;color:var(--ink-70);margin-top:14px}
 @media(max-width:560px){
-  .workout-week{grid-template-columns:repeat(2,1fr)}
-  .workout-row{grid-template-columns:30px 1fr}
-  .workout-reps{grid-column:2;justify-self:start}
+  .calorie-head{flex-direction:column}
+  .add-btn{width:100%}
+  .workout-meta{white-space:normal;text-align:right}
 }
+
+
+.workout-list{gap:24px}
+.workout-day{margin-top:0}
+.workout-day-title{font-size:12px;font-weight:800;color:var(--ink);letter-spacing:2px;padding-bottom:9px;border-bottom:2px solid var(--ink);margin-bottom:12px}
+.workout-superset{border:1px solid var(--ink);background:var(--paper);padding:8px;margin-bottom:10px;box-shadow:2px 2px 0 var(--ink-45)}
+.workout-superset.single{padding-bottom:8px}
+.superset-label{font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:1.6px;color:var(--ink-45);margin:2px 4px 7px;text-transform:uppercase}
+.workout-superset .workout-row{border:0;border-top:1px dashed var(--line);box-shadow:none;padding:10px 4px;margin:0}
+.workout-superset .workout-row:first-of-type{border-top:0}
+.workout-superset .workout-row:hover{background:var(--paper-2);transform:none}
+.workout-row.done{background:var(--paper-2);opacity:.55}
+.rest-day{margin-top:0}
+
+
+/* ---------- workout accordion ---------- */
+.workout-accordion{display:grid;gap:10px}
+.workout-accordion-item{border:1.5px solid var(--ink);background:var(--paper);box-shadow:var(--shadow-paper);overflow:hidden}
+.workout-day-toggle{
+  width:100%;border:0;background:var(--paper);color:var(--ink);
+  padding:17px 18px;display:flex;align-items:center;justify-content:space-between;
+  gap:15px;text-align:left;cursor:pointer;transition:background .18s ease;
+}
+.workout-day-toggle:hover{background:var(--paper-2)}
+.workout-day-info{display:flex;align-items:baseline;gap:12px;min-width:0}
+.workout-day-info strong{font-family:var(--mono);font-size:12px;letter-spacing:1.5px;white-space:nowrap}
+.workout-day-info span{font-family:var(--display);font-size:19px;font-weight:600}
+.workout-day-right{display:flex;align-items:center;gap:13px;flex:none}
+.day-completion{font-family:var(--mono);font-size:10px;color:var(--ink-45);font-weight:700}
+.accordion-arrow{
+  width:27px;height:27px;border:1px solid var(--ink);display:grid;place-items:center;
+  font-size:18px;line-height:1;transition:transform .25s ease,background .18s ease,color .18s ease;
+}
+.workout-accordion-item.open .accordion-arrow{transform:rotate(180deg);background:var(--ink);color:var(--paper)}
+.workout-day-content{display:none;border-top:0;padding:0}
+.workout-accordion-item.open .workout-day-content{display:block;border-top:1px dashed var(--line-strong);padding:14px}
+.workout-accordion-item .workout-superset{margin-bottom:10px}
+.workout-accordion-item .workout-superset:last-child{margin-bottom:0}
+.workout-accordion-item .workout-row{background:var(--paper)}
+.workout-accordion-item .workout-row:hover{background:var(--paper-2)}
+.rest-day .workout-day-content .notice{margin:0}
+@media(max-width:560px){
+  .workout-day-toggle{padding:15px 13px}
+  .workout-day-info{gap:8px}
+  .workout-day-info span{font-size:17px}
+  .day-completion{display:none}
+  .workout-day-content{font-size:13px}
+}
+
+/* accordion closed-state safety: exercise content is completely hidden until clicked */
+.workout-accordion .workout-day-content{display:none !important;}
+.workout-accordion .workout-accordion-item.open .workout-day-content{display:block !important;}
+
+/* One checkbox per superset */
+.superset-check-label{
+  display:flex;align-items:center;gap:10px;
+  margin:2px 4px 7px;
+  cursor:pointer;
+}
+.superset-check-label .workout-check{
+  width:18px;height:18px;margin:0;cursor:pointer;accent-color:var(--ink);
+}
+.superset-check-label .superset-label{
+  margin:0;
+}
+.workout-superset.done{
+  opacity:.58;
+}
+.workout-superset.done .workout-name{
+  text-decoration:line-through;
+  text-decoration-thickness:1px;
+}
+.workout-superset.done .superset-label{
+  text-decoration:line-through;
+}
+
+
+/* ---------- interactive workout animations ---------- */
+.workout-accordion-item{
+  transform:translateZ(0);
+  transition:
+    transform .22s cubic-bezier(.22,1,.36,1),
+    box-shadow .22s cubic-bezier(.22,1,.36,1),
+    border-color .22s ease;
+}
+.workout-accordion-item:hover{
+  transform:translateY(-1px);
+}
+.workout-accordion-item.open{
+  box-shadow:4px 5px 0 var(--ink-45);
+}
+.workout-day-toggle{
+  position:relative;
+  overflow:hidden;
+  transition:
+    background .2s ease,
+    padding .25s cubic-bezier(.22,1,.36,1);
+}
+.workout-day-toggle::after{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:0;
+  width:100%;
+  height:2px;
+  background:var(--ink);
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform .35s cubic-bezier(.22,1,.36,1);
+}
+.workout-accordion-item.open .workout-day-toggle::after{
+  transform:scaleX(1);
+}
+.workout-day-info strong{
+  transition:letter-spacing .25s ease,transform .25s ease;
+}
+.workout-day-info span{
+  transition:transform .25s cubic-bezier(.22,1,.36,1);
+}
+.workout-accordion-item.open .workout-day-info strong{
+  letter-spacing:2px;
+}
+.workout-accordion-item.open .workout-day-info span{
+  transform:translateX(2px);
+}
+
+.accordion-arrow{
+  transition:
+    transform .35s cubic-bezier(.22,1,.36,1),
+    background .2s ease,
+    color .2s ease,
+    box-shadow .2s ease;
+}
+.workout-accordion-item.open .accordion-arrow{
+  transform:rotate(180deg) scale(1.03);
+  box-shadow:2px 2px 0 var(--ink-45);
+}
+
+/* Content reveal */
+.workout-day-content{
+  display:grid;
+  grid-template-rows:0fr;
+  opacity:0;
+  transition:
+    grid-template-rows .42s cubic-bezier(.22,1,.36,1),
+    opacity .22s ease;
+}
+.workout-day-content > div{
+  min-height:0;
+  overflow:hidden;
+}
+.workout-accordion-item.open .workout-day-content{
+  grid-template-rows:1fr;
+  opacity:1;
+}
+
+/* Supersets animate in sequentially */
+.workout-day-content .workout-superset{
+  opacity:0;
+  transform:translateY(-8px);
+  transition:
+    opacity .28s ease,
+    transform .38s cubic-bezier(.22,1,.36,1),
+    background .2s ease,
+    box-shadow .2s ease,
+    opacity .2s ease;
+}
+.workout-accordion-item.open .workout-day-content .workout-superset{
+  opacity:1;
+  transform:translateY(0);
+}
+.workout-accordion-item.open .workout-day-content .workout-superset:nth-child(1){transition-delay:.04s}
+.workout-accordion-item.open .workout-day-content .workout-superset:nth-child(2){transition-delay:.09s}
+.workout-accordion-item.open .workout-day-content .workout-superset:nth-child(3){transition-delay:.14s}
+.workout-accordion-item.open .workout-day-content .workout-superset:nth-child(4){transition-delay:.19s}
+.workout-accordion-item.open .workout-day-content .workout-superset:nth-child(5){transition-delay:.24s}
+
+/* Superset hover */
+.workout-superset{
+  position:relative;
+  overflow:hidden;
+  transition:
+    transform .2s cubic-bezier(.22,1,.36,1),
+    box-shadow .2s ease,
+    background .2s ease,
+    opacity .2s ease;
+}
+.workout-superset:hover{
+  transform:translateX(3px);
+  box-shadow:3px 3px 0 var(--ink-45);
+}
+.workout-superset::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:3px;
+  background:var(--ink);
+  transform:scaleY(0);
+  transform-origin:center;
+  transition:transform .22s cubic-bezier(.22,1,.36,1);
+}
+.workout-superset:hover::before,
+.workout-superset.done::before{
+  transform:scaleY(1);
+}
+
+/* Checkbox interaction */
+.superset-check-label{
+  position:relative;
+  transition:transform .18s ease;
+}
+.superset-check-label:hover{
+  transform:translateX(2px);
+}
+.superset-check-label .workout-check{
+  appearance:none;
+  -webkit-appearance:none;
+  position:relative;
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  margin:0;
+  border:1.5px solid var(--ink);
+  background:var(--paper);
+  cursor:pointer;
+  transition:
+    background .18s ease,
+    transform .18s cubic-bezier(.22,1,.36,1),
+    box-shadow .18s ease;
+}
+.superset-check-label .workout-check::after{
+  content:"";
+  position:absolute;
+  left:4px;
+  top:1px;
+  width:6px;
+  height:10px;
+  border-right:2px solid var(--paper);
+  border-bottom:2px solid var(--paper);
+  transform:rotate(45deg) scale(0);
+  transform-origin:center;
+  transition:transform .18s cubic-bezier(.22,1,.36,1);
+}
+.superset-check-label .workout-check:hover{
+  transform:scale(1.08);
+}
+.superset-check-label .workout-check:checked{
+  background:var(--ink);
+  box-shadow:2px 2px 0 var(--ink-45);
+}
+.superset-check-label .workout-check:checked::after{
+  transform:rotate(45deg) scale(1);
+}
+.workout-superset.done{
+  transform:translateX(2px);
+}
+.workout-superset.done .workout-name{
+  text-decoration:line-through;
+  text-decoration-thickness:1px;
+  opacity:.6;
+  transition:opacity .2s ease;
+}
+.workout-superset.done .superset-label{
+  opacity:.55;
+}
+
+/* Day completion counter */
+.day-completion{
+  transition:transform .2s ease,opacity .2s ease;
+}
+.workout-accordion-item:has(.workout-check:checked) .day-completion{
+  transform:scale(1.05);
+}
+
+/* Respect reduced-motion */
+@media (prefers-reduced-motion:reduce){
+  .workout-accordion-item,
+  .workout-day-toggle,
+  .workout-day-content,
+  .workout-day-content .workout-superset,
+  .workout-superset,
+  .accordion-arrow,
+  .superset-check-label,
+  .superset-check-label .workout-check{
+    transition:none!important;
+  }
+}
+
+
+.workout-day-toggle:focus-visible{
+  outline:2px solid var(--ink);
+  outline-offset:-4px;
+}
+.superset-check-label:focus-within{
+  transform:translateX(2px);
+}
+
+
+/* Theme switch interaction */
+.theme-btn{
+  position:relative;
+  overflow:hidden;
+  transition:transform .18s cubic-bezier(.22,1,.36,1),background-color .2s ease,color .2s ease,box-shadow .2s ease;
+}
+.theme-btn:hover{transform:translateY(-1px)}
+.theme-btn:active{transform:scale(.92)}
+.theme-btn.active{box-shadow:0 0 0 1px var(--ink)}
 
 </style>
-</head>
+
 <body>
-<div class="grain" aria-hidden="true"></div>
+<div class="grain"></div>
+
 <div class="app">
-<aside class="sidebar">
-  <div class="logo-row">
-    <div class="logo-mark"><span>DD</span></div>
-    <div class="logo-text">Dapur Data<small>Buku Ledger AI</small></div>
-  </div>
-  <div class="nav-eyebrow">Menu</div>
-  <nav class="nav">
-    <button class="active" data-page="dashboard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c3-1.3 6-1.3 8 0 2-1.3 5-1.3 8 0v13c-3-1.3-6-1.3-8 0-2-1.3-5-1.3-8 0V5Z"/><path d="M12 5v13"/></svg></span> Dashboard</button>
-    <button data-page="add"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/><path d="M12 8v8M8 12h8"/></svg></span> Add Food</button>
-    <button data-page="analytics"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M11 20V4M18 20v-7"/><path d="M3 20h18"/></svg></span> Analytics</button>
-    <button data-page="history"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9l5 5v11H5z"/><path d="M8 11h8M8 14.5h8M8 18h5"/></svg></span> History</button>
-    <button data-page="workout"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h3v8H6zM15 8h3v8h-3z"/><path d="M9 12h6M3.5 10.5H6M18 10.5h2.5M3.5 13.5H6M18 13.5h2.5"/></svg></span> Workout</button>
-    <button data-page="settings"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.57V22h-2.55v-.09a1.7 1.7 0 0 0-1.03-1.57 1.7 1.7 0 0 0-1.88.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 8.1 15a1.7 1.7 0 0 0-1.57-1.03H6.45v-2.55h.08A1.7 1.7 0 0 0 8.1 10.4a1.7 1.7 0 0 0-.34-1.88L7.7 8.46l1.8-1.8.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.57V5h2.55v.49a1.7 1.7 0 0 0 1.03 1.57 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.8 1.8-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.57 1.03H21v2.55h-.49A1.7 1.7 0 0 0 19.4 15Z"/></svg></span> Settings</button>
-  </nav>
-  <div class="sidebar-foot">
-    <p>Catat sekarang,<br>rekap otomatis nanti.</p>
-  </div>
-</aside>
-
-<main class="main">
-  <div class="topbar">
-    <div class="greeting">
-      <p class="eyebrow">Buku Dapur Digital</p>
-      <h1 id="pageTitle">Good evening 👋</h1>
-      <p>Track your nutrition, one meal at a time.</p>
+  <aside class="sidebar">
+    <div class="logo-row">
+      <div class="logo-mark"><span>DD</span></div>
+      <div class="logo-text">Dapur Data<small>CALORIE LEDGER</small></div>
     </div>
-    <div class="topbar-controls">
-      <div class="theme-switch" role="group" aria-label="Pengaturan tema">
-        <button id="themeLight" class="theme-btn active" type="button" aria-pressed="true" title="Light mode">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>
-        </button>
-        <button id="themeDark" class="theme-btn" type="button" aria-pressed="false" title="Dark mode">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5Z"/></svg>
-        </button>
-      </div>
-      <div class="datebox">
-        <button id="prevDate" aria-label="Previous day">‹</button>
-        <input type="date" id="dateInput">
-        <button id="nextDate" aria-label="Next day">›</button>
-      </div>
-    </div>
-  </div>
 
-  <section id="dashboard" class="page active">
-    <div class="grid">
-      <div class="card calorie-card">
-        <div class="receipt-strip" aria-hidden="true">
-          <i style="width:2px"></i><i style="width:1px"></i><i style="width:3px"></i><i style="width:1px"></i><i style="width:2px"></i><i style="width:4px"></i><i style="width:1px"></i><i style="width:2px"></i><i style="width:1px"></i><i style="width:3px"></i><i style="width:1px"></i><i style="width:2px"></i><i style="width:2px"></i><i style="width:1px"></i><i style="width:3px"></i>
+    <nav class="nav">
+      <div class="nav-eyebrow">Menu</div>
+      <button class="active" data-page="dashboard">
+        <span class="ic">⌂</span><span>Dashboard</span>
+      </button>
+      <button data-page="add">
+        <span class="ic">＋</span><span>Tambah Makanan</span>
+      </button>
+      <button data-page="history">
+        <span class="ic">▤</span><span>Riwayat</span>
+      </button>
+      <button data-page="stats">
+        <span class="ic">▥</span><span>Statistik</span>
+      </button>
+      <button data-page="profile">
+        <span class="ic">◎</span><span>Profil & Target</span>
+      </button>
+      <button data-page="workout">
+        <span class="ic">✓</span><span>Latihan</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <p>CATAT • CEK • KONSISTEN<br>Ledger kalori pribadi.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="greeting">
+        <p class="eyebrow">DAPUR DATA / LEDGER HARIAN</p>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageSubtitle">Pantau asupan kalori dan progresmu hari ini.</p>
+      </div>
+
+      <div class="topbar-controls">
+        <div class="datebox">
+          <button id="prevDate" type="button">‹</button>
+          <input id="dateInput" type="date">
+          <button id="nextDate" type="button">›</button>
         </div>
-        <div class="calorie-inner">
-          <p class="ticket-no">TIKET № 001 · DAPUR DATA</p>
-          <div class="calorie-head">
-            <div>
-              <p class="calorie-eyebrow">Calories consumed</p>
-              <div class="calorie-number" id="totalKcal">0 <small>kcal</small></div>
+        <div class="theme-switch" aria-label="Tema">
+          <button class="theme-btn active" id="lightTheme" type="button">☼</button>
+          <button class="theme-btn" id="darkTheme" type="button">☾</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="grid">
+        <div class="card calorie-card">
+          <div class="receipt-strip">
+            <i style="width:7px"></i><i style="width:18px"></i><i style="width:5px"></i>
+            <i style="width:28px"></i><i style="width:10px"></i><i style="width:20px"></i>
+          </div>
+          <div class="calorie-inner">
+            <div class="calorie-head">
+              <div>
+                <p class="ticket-no" id="ticketNo">TICKET #0001</p>
+                <p class="calorie-eyebrow">Total hari ini</p>
+                <div class="calorie-number"><span id="totalKcal">0</span> <small>kcal</small></div>
+              </div>
+              <button class="add-btn" id="quickAdd" type="button">＋ Tambah makanan</button>
             </div>
-            <button class="add-btn" onclick="showPage('add')">＋ Add Food</button>
+
+            <div class="line-item">
+              <span>TARGET</span><span class="fill"></span>
+              <b id="targetKcal">2.000 kcal</b>
+            </div>
+            <div class="progress"><i id="calorieProgress"></i></div>
+
+            <div class="macro-grid">
+              <div class="macro"><b id="proteinTotal">0 g</b><span>Protein</span></div>
+              <div class="macro"><b id="carbTotal">0 g</b><span>Karbo</span></div>
+              <div class="macro"><b id="fatTotal">0 g</b><span>Lemak</span></div>
+            </div>
           </div>
-          <div class="line-item"><span>TARGET HARIAN</span><span class="fill"></span><b id="targetText">0</b><span>kcal</span></div>
-          <div class="progress"><i id="calProgress"></i></div>
-          <div class="macro-grid">
-            <div class="macro"><b id="protein">0g</b><span>Protein</span></div>
-            <div class="macro"><b id="carbs">0g</b><span>Carbs</span></div>
-            <div class="macro"><b id="fat">0g</b><span>Fat</span></div>
+        </div>
+
+        <div class="card pad">
+          <div class="card-title"><h2>Ringkasan</h2><span class="tag">Hari ini</span></div>
+          <div class="stat-grid" style="margin-bottom:0">
+            <div class="stat"><span>Makanan</span><b id="mealCount">0</b></div>
+            <div class="stat"><span>Sisa target</span><b id="remainingKcal">2.000</b></div>
+            <div class="stat"><span>Latihan</span><b id="workoutProgress">0%</b></div>
           </div>
+          <div class="notice">Gunakan halaman <b>Tambah Makanan</b> untuk memasukkan makanan secara manual. Data tersimpan lokal di browser ini.</div>
         </div>
       </div>
 
+      <div class="card pad" style="margin-top:22px">
+        <div class="card-title"><h2>Catatan makanan</h2><span class="tag" id="mealDateLabel">Hari ini</span></div>
+        <div class="meal-list" id="mealList"></div>
+      </div>
+    </section>
+
+    <!-- ADD FOOD -->
+    <section class="page" id="page-add">
       <div class="card pad">
-        <div class="card-title"><h2>AI Daily Insight</h2><span class="tag">AI · Read-out</span></div>
-        <p id="dailyInsight" class="muted" style="line-height:1.65">Tambahkan makanan untuk mendapatkan analisis AI harian.</p>
-        <div class="suggestion">
-          <b>Tip dari dapur</b><br>
-          <span id="dailyTip">Catat makanan segera setelah makan agar estimasi harian lebih akurat.</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="card pad" style="margin-top:20px">
-      <div class="card-title"><h2>Today's meals</h2><span class="muted" id="mealCount">0 items</span></div>
-      <div id="mealList" class="meal-list"></div>
-    </div>
-  </section>
-
-  <section id="add" class="page">
-    <div class="card pad">
-      <div class="card-title"><h2>Analyze your food</h2><span class="tag">AI Food Scanner</span></div>
-      <div class="mode">
-        <button class="active" data-mode="both">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg>
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1Z"/></svg>
-          Both
-        </button>
-        <button data-mode="photo"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg> Photo</button>
-        <button data-mode="text"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1Z"/></svg> Description</button>
-      </div>
-      <div class="form-grid">
-        <div id="photoField" class="full upload">
-          <span class="drop-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg></span>
-          <p>Upload food or drink photo</p>
-          <p class="muted" style="font-size:13px">Gunakan foto yang jelas dan dari atas bila memungkinkan.</p>
-          <button type="button" class="add-btn" id="choosePhotoBtn">Choose / Take Photo</button>
-          <input id="foodPhoto" type="file" accept="image/*" capture="environment" style="display:none">
-          <p id="photoStatus" class="muted" style="font-size:12px;margin:12px 0 0">Belum ada foto dipilih.</p>
-          <img id="preview" class="preview" alt="Food preview">
-        </div>
-        <div id="textField" class="full">
-          <label for="description">Food description</label>
-          <textarea id="description" placeholder="Contoh: nasi putih 150g, ayam goreng paha 1 potong, telur ceplok 1, teh manis 250ml"></textarea>
-        </div>
-        <div>
-          <label for="mealType">Meal</label>
-          <select id="mealType"><option>Breakfast</option><option>Lunch</option><option>Snack</option><option>Dinner</option><option>Drink</option></select>
-        </div>
-        <div>
-          <label for="manualKcal">Kalori manual (opsional)</label>
-          <input id="manualKcal" type="number" min="0" placeholder="Kosongkan untuk memakai estimasi Gemini">
-        </div>
-        <div class="full" style="display:flex;gap:10px;justify-content:flex-end">
-          <button class="add-btn" onclick="analyzeFood()">Analyze with AI</button>
-        </div>
-      </div>
-      <div id="aiResult" class="ai-result"></div>
-    </div>
-  </section>
-
-  <section id="analytics" class="page">
-    <div class="stat-grid">
-      <div class="stat"><span>Weekly average</span><b id="weekAvg">0 kcal</b></div>
-      <div class="stat"><span>Monthly average</span><b id="monthAvg">0 kcal</b></div>
-      <div class="stat"><span>Days tracked</span><b id="daysTracked">0</b></div>
-    </div>
-    <div class="card pad">
-      <div class="card-title"><h2>Weekly overview</h2><span class="muted">Last 7 days</span></div>
-      <div id="weekChart" class="chart"></div>
-    </div>
-    <div class="card pad" style="margin-top:20px">
-      <div class="card-title"><h2>Monthly overview</h2><span class="muted" id="monthLabel"></span></div>
-      <div id="monthInsight" class="muted" style="line-height:1.7"></div>
-    </div>
-  </section>
-
-  <section id="history" class="page">
-    <div class="card pad">
-      <div class="card-title"><h2>Food history</h2><span class="muted">All saved entries</span></div>
-      <div style="overflow:auto">
-        <table class="history-table">
-          <thead><tr><th>Date</th><th>Food</th><th>Meal</th><th>Calories</th><th>Score</th></tr></thead>
-          <tbody id="historyBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <section id="settings" class="page">
-    <div class="card pad">
-      <div class="card-title">
-        <h2>Profile & Calorie Settings</h2>
-        <span class="tag">Personal Target</span>
-      </div>
-
-      <p class="muted" style="line-height:1.65;margin-top:0">
-        Masukkan data tubuh untuk mendapatkan estimasi kebutuhan kalori harian.
-        Target harian bisa langsung mengikuti rekomendasi atau diatur sendiri.
-      </p>
-
-      <div class="settings-grid">
-        <div>
-          <label for="weightInput">Berat badan (kg)</label>
-          <input id="weightInput" type="number" min="20" max="400" step="0.1" placeholder="Contoh: 86">
-        </div>
-        <div>
-          <label for="heightInput">Tinggi badan (cm)</label>
-          <input id="heightInput" type="number" min="100" max="250" step="0.1" placeholder="Contoh: 170">
-        </div>
-        <div>
-          <label for="ageInput">Usia (tahun)</label>
-          <input id="ageInput" type="number" min="13" max="100" step="1" placeholder="Contoh: 24">
-        </div>
-        <div>
-          <label for="sexInput">Jenis kelamin</label>
-          <select id="sexInput">
-            <option value="male">Pria</option>
-            <option value="female">Wanita</option>
-          </select>
-        </div>
-        <div class="full">
-          <label for="activityInput">Aktivitas harian</label>
-          <select id="activityInput">
-            <option value="1.2">Sedentary — banyak duduk, sedikit olahraga</option>
-            <option value="1.375">Light — olahraga ringan 1–3 hari/minggu</option>
-            <option value="1.55">Moderate — olahraga 3–5 hari/minggu</option>
-            <option value="1.725">Very active — olahraga berat 6–7 hari/minggu</option>
-            <option value="1.9">Extra active — aktivitas fisik sangat tinggi</option>
-          </select>
-        </div>
-        <div class="full">
-          <label for="goalInput">Tujuan</label>
-          <select id="goalInput">
-            <option value="lose">Turun berat badan</option>
-            <option value="maintain">Mempertahankan berat badan</option>
-            <option value="gain">Menaikkan berat badan</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="settings-result">
-        <div style="font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-45)">
-          Rekomendasi asupan kalori harian
-        </div>
-        <div class="settings-number" id="recommendedKcal">— kcal</div>
-        <div class="settings-note" id="recommendationNote">
-          Lengkapi data di atas untuk menghitung estimasi.
-        </div>
-
-        <div class="recommendation">
-          <div class="macro">
-            <b id="bmrValue">—</b>
-            <span>BMR</span>
-          </div>
-          <div class="macro">
-            <b id="tdeeValue">—</b>
-            <span>TDEE</span>
-          </div>
-          <div class="macro">
-            <b id="bmiValue">—</b>
-            <span>BMI</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <div class="card-title">
-          <h3>Target kalori harian</h3>
-          <span class="muted">Dipakai dashboard & analytics</span>
-        </div>
-
-        <div class="settings-grid">
-          <div class="full">
-            <label for="targetInput">Target (kcal/hari)</label>
-            <input id="targetInput" type="number" min="800" max="10000" step="50" placeholder="Contoh: 2200">
-            <div class="settings-note">
-              Rekomendasi hanya estimasi. Target dapat kamu sesuaikan berdasarkan tujuan dan kondisi pribadi.
+        <div class="card-title"><h2>Tambah makanan</h2><span class="tag">Manual</span></div>
+        <form id="foodForm">
+          <div class="form-grid">
+            <div>
+              <label for="foodName">Nama makanan</label>
+              <input id="foodName" type="text" placeholder="Contoh: Nasi + ayam" required>
+            </div>
+            <div>
+              <label for="foodKcal">Kalori (kcal)</label>
+              <input id="foodKcal" type="number" min="0" step="1" placeholder="500" required>
+            </div>
+            <div>
+              <label for="foodProtein">Protein (g)</label>
+              <input id="foodProtein" type="number" min="0" step="0.1" placeholder="25">
+            </div>
+            <div>
+              <label for="foodCarb">Karbohidrat (g)</label>
+              <input id="foodCarb" type="number" min="0" step="0.1" placeholder="50">
+            </div>
+            <div>
+              <label for="foodFat">Lemak (g)</label>
+              <input id="foodFat" type="number" min="0" step="0.1" placeholder="15">
+            </div>
+            <div>
+              <label for="foodTime">Waktu</label>
+              <input id="foodTime" type="time">
+            </div>
+            <div class="full">
+              <label for="foodNote">Catatan</label>
+              <textarea id="foodNote" placeholder="Porsi, bahan, atau catatan lainnya..."></textarea>
             </div>
           </div>
+          <div class="settings-actions">
+            <button class="secondary-btn" type="button" id="cancelFood">Batal</button>
+            <button class="add-btn" type="submit">Simpan makanan</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="page" id="page-history">
+      <div class="card pad">
+        <div class="card-title"><h2>Riwayat makanan</h2><span class="tag">Semua tanggal</span></div>
+        <div style="overflow:auto">
+          <table class="history-table">
+            <thead><tr><th>Tanggal</th><th>Makanan</th><th>Kalori</th><th>Makro</th><th></th></tr></thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="page" id="page-stats">
+      <div class="stat-grid">
+        <div class="stat"><span>Rata-rata 7 hari</span><b id="avg7">0 kcal</b></div>
+        <div class="stat"><span>Total makanan</span><b id="allMealCount">0</b></div>
+        <div class="stat"><span>Target harian</span><b id="statsTarget">2.000</b></div>
+      </div>
+      <div class="card pad">
+        <div class="card-title"><h2>7 hari terakhir</h2><span class="tag">KCAL</span></div>
+        <div class="chart" id="chart"></div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="page" id="page-profile">
+      <div class="card pad">
+        <div class="card-title"><h2>Profil & target kalori</h2><span class="tag">Pengaturan</span></div>
+        <form id="profileForm">
+          <div class="settings-grid">
+            <div><label for="profileWeight">Berat (kg)</label><input id="profileWeight" type="number" min="1" step=".1" value="86"></div>
+            <div><label for="profileHeight">Tinggi (cm)</label><input id="profileHeight" type="number" min="1" step="1" value="170"></div>
+            <div><label for="profileAge">Usia</label><input id="profileAge" type="number" min="1" step="1" value="24"></div>
+            <div><label for="profileActivity">Aktivitas</label>
+              <select id="profileActivity">
+                <option value="1.2">Sedentary — 1.2</option>
+                <option value="1.375">Light — 1.375</option>
+                <option value="1.55" selected>Moderate — 1.55</option>
+                <option value="1.725">High — 1.725</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-section">
+            <label>Target</label>
+            <div class="target-options">
+              <button class="target-option active" type="button" data-goal="loss">Turun</button>
+              <button class="target-option" type="button" data-goal="maintain">Maintain</button>
+              <button class="target-option" type="button" data-goal="gain">Naik</button>
+            </div>
+          </div>
+          <div class="settings-result">
+            <div class="settings-grid">
+              <div><span class="muted">BMR</span><div class="settings-number" id="bmrValue">—</div></div>
+              <div><span class="muted">TDEE</span><div class="settings-number" id="tdeeValue">—</div></div>
+            </div>
+            <div class="recommendation">
+              <div class="macro"><b id="recommendedKcal">—</b><span>Target kcal</span></div>
+              <div class="macro"><b id="recommendedProtein">—</b><span>Protein</span></div>
+              <div class="macro"><b id="recommendedFat">—</b><span>Lemak</span></div>
+            </div>
+          </div>
+          <div class="settings-actions"><button class="add-btn" type="submit">Simpan profil</button></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- WORKOUT -->
+    <section class="page" id="page-workout">
+      <div class="card pad">
+        <div class="card-title">
+          <div class="workout-head">
+            <h2>Checklist latihan</h2>
+            <span class="workout-progress" id="workoutProgressText">0 / 0 exercises</span>
+          </div>
+          <button class="secondary-btn" type="button" id="workoutReset">Reset</button>
         </div>
 
-        <div class="target-options">
-          <button type="button" class="target-option" data-target-choice="recommended">Pakai rekomendasi</button>
-          <button type="button" class="target-option" data-target-choice="custom">Target custom</button>
-          <button type="button" class="target-option" data-target-choice="reset">Kembali ke 2200</button>
+        <div class="workout-static-list workout-accordion">
+
+          <div class="workout-day workout-accordion-item">
+            <button class="workout-day-toggle" type="button" aria-expanded="false">
+              <span class="workout-day-info">
+                <strong>DAY 1</strong>
+                <span>PUSH</span>
+              </span>
+              <span class="workout-day-right">
+                <span class="day-completion">0 / 8</span>
+                <span class="accordion-arrow">⌄</span>
+              </span>
+            </button>
+            <div class="workout-day-content">
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 01</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Floor Press</span><span class="workout-meta">3 × 8–12</span></div>
+                <div class="workout-row"><span class="workout-name">Dumbbell Lateral Raise (Standing)</span><span class="workout-meta">3 × 10–15</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 02</div></span></label>
+                <div class="workout-row"><span class="workout-name">Single-Arm Dumbbell Shoulder Press</span><span class="workout-meta">3 × 8–12</span></div>
+                <div class="workout-row"><span class="workout-name">Dumbbell Overhead Tricep Extension (Standing)</span><span class="workout-meta">3 × 10–15</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 03</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Fly</span><span class="workout-meta">3 × 12–15</span></div>
+                <div class="workout-row"><span class="workout-name">Front Raise (Alternating Dumbbell)</span><span class="workout-meta">3 × 10–15</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 04</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Pullover (Lying on Floor)</span><span class="workout-meta">2 × 10–15</span></div>
+                <div class="workout-row"><span class="workout-name">Dumbbell Tricep Kickback (Standing)</span><span class="workout-meta">2 × 12–15</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="workout-day workout-accordion-item">
+            <button class="workout-day-toggle" type="button" aria-expanded="false">
+              <span class="workout-day-info">
+                <strong>DAY 2</strong>
+                <span>PULL</span>
+              </span>
+              <span class="workout-day-right">
+                <span class="day-completion">0 / 8</span>
+                <span class="accordion-arrow">⌄</span>
+              </span>
+            </button>
+            <div class="workout-day-content">
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 01</div></span></label>
+                <div class="workout-row"><span class="workout-name">Single-Arm Dumbbell Row (Bent Over)</span><span class="workout-meta">3 × 8–12</span></div>
+                <div class="workout-row"><span class="workout-name">Hammer Curl (Standing)</span><span class="workout-meta">3 × 10–15</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 02</div></span></label>
+                <div class="workout-row"><span class="workout-name">Renegade Row</span><span class="workout-meta">3 × 10–15</span></div>
+                <div class="workout-row"><span class="workout-name">Single-Arm Dumbbell Curl (Standing)</span><span class="workout-meta">3 × 8–12</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 03</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Reverse Fly (Bent Over)</span><span class="workout-meta">3 × 10–15</span></div>
+                <div class="workout-row"><span class="workout-name">Wrist Curl (Seated or Standing)</span><span class="workout-meta">2 × 15–20</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 04</div></span></label>
+                <div class="workout-row"><span class="workout-name">Concentration Curl (Seated on Floor)</span><span class="workout-meta">2 × 12–15</span></div>
+                <div class="workout-row"><span class="workout-name">Reverse Wrist Curl (Seated or Standing)</span><span class="workout-meta">2 × 15–20</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="workout-day workout-accordion-item">
+            <button class="workout-day-toggle" type="button" aria-expanded="false">
+              <span class="workout-day-info">
+                <strong>DAY 3</strong>
+                <span>LEGS A</span>
+              </span>
+              <span class="workout-day-right">
+                <span class="day-completion">0 / 7</span>
+                <span class="accordion-arrow">⌄</span>
+              </span>
+            </button>
+            <div class="workout-day-content">
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 01</div></span></label>
+                <div class="workout-row"><span class="workout-name">Goblet Squat</span><span class="workout-meta">3 × 10–15</span></div>
+                <div class="workout-row"><span class="workout-name">Single Dumbbell Calf Raise (Standing)</span><span class="workout-meta">3 × 12–20</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 02</div></span></label>
+                <div class="workout-row"><span class="workout-name">Bulgarian Split Squat</span><span class="workout-meta">3 × 8–12</span></div>
+                <div class="workout-row"><span class="workout-name">Hanging Leg Raise</span><span class="workout-meta">3 × 10–15</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 03</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Romanian Deadlift</span><span class="workout-meta">3 × 8–12</span></div>
+                <div class="workout-row"><span class="workout-name">Plank</span><span class="workout-meta">2 × 30–60 detik</span></div>
+              </div>
+              <div class="workout-superset single">
+                <div class="superset-label">FINISHER</div>
+                <div class="workout-row"><span class="workout-name">Dumbbell Hip Thrust / Glute Bridge</span><span class="workout-meta">3 × 10–15</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="workout-day workout-accordion-item rest-day">
+            <button class="workout-day-toggle" type="button" aria-expanded="false">
+              <span class="workout-day-info">
+                <strong>DAY 4</strong>
+                <span>REST</span>
+              </span>
+              <span class="workout-day-right">
+                <span class="day-completion">REST</span>
+                <span class="accordion-arrow">⌄</span>
+              </span>
+            </button>
+            <div class="workout-day-content">
+              <div class="notice">Hari istirahat. Tidak ada checklist latihan.</div>
+            </div>
+          </div>
+
+          <div class="workout-day workout-accordion-item">
+            <button class="workout-day-toggle" type="button" aria-expanded="false">
+              <span class="workout-day-info">
+                <strong>DAY 5</strong>
+                <span>UPPER</span>
+              </span>
+              <span class="workout-day-right">
+                <span class="day-completion">0 / 10</span>
+                <span class="accordion-arrow">⌄</span>
+              </span>
+            </button>
+            <div class="workout-day-content">
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 01</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Floor Press</span><span class="workout-meta">3 × 8–12</span></div>
+                <div class="workout-row"><span class="workout-name">Dumbbell Lateral Raise (Standing)</span><span class="workout-meta">3 × 12–20</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 02</div></span></label>
+                <div class="workout-row"><span class="workout-name">Single-Arm Dumbbell Row (Bent Over)</span><span class="workout-meta">3 × 8–12</span></div>
+                <div class="workout-row"><span class="workout-name">Dumbbell Front Raise</span><span class="workout-meta">2 × 12–15</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 03</div></span></label>
+                <div class="workout-row"><span class="workout-name">Single-Arm Dumbbell Shoulder Press</span><span class="workout-meta">2 × 8–12</span></div>
+                <div class="workout-row"><span class="workout-name">Hammer Curl (Standing)</span><span class="workout-meta">2 × 10–15</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 04</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Reverse Fly (Bent Over)</span><span class="workout-meta">2 × 12–20</span></div>
+                <div class="workout-row"><span class="workout-name">Dumbbell Overhead Tricep Extension</span><span class="workout-meta">2 × 10–15</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 05</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Fly</span><span class="workout-meta">2 × 12–15</span></div>
+                <div class="workout-row"><span class="workout-name">Dumbbell Shrug</span><span class="workout-meta">2 × 10–15</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="workout-day workout-accordion-item">
+            <button class="workout-day-toggle" type="button" aria-expanded="false">
+              <span class="workout-day-info">
+                <strong>DAY 6</strong>
+                <span>LOWER B</span>
+              </span>
+              <span class="workout-day-right">
+                <span class="day-completion">0 / 10</span>
+                <span class="accordion-arrow">⌄</span>
+              </span>
+            </button>
+            <div class="workout-day-content">
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 01</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Reverse Lunge</span><span class="workout-meta">3 × 8–12</span></div>
+                <div class="workout-row"><span class="workout-name">Single Dumbbell Calf Raise (Standing)</span><span class="workout-meta">3 × 15–20</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 02</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Sumo Squat</span><span class="workout-meta">3 × 10–15</span></div>
+                <div class="workout-row"><span class="workout-name">Weighted Leg Raise</span><span class="workout-meta">3 × 10–15</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 03</div></span></label>
+                <div class="workout-row"><span class="workout-name">Single-Leg Dumbbell Deadlift</span><span class="workout-meta">3 × 8–12</span></div>
+                <div class="workout-row"><span class="workout-name">One-Arm Plank</span><span class="workout-meta">2 × 30–45 detik</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 04</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Hip Thrust / Glute Bridge</span><span class="workout-meta">3 × 10–15</span></div>
+                <div class="workout-row"><span class="workout-name">Seated Dumbbell Calf Raise</span><span class="workout-meta">3 × 15–20</span></div>
+              </div>
+              <div class="workout-superset">
+                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 05</div></span></label>
+                <div class="workout-row"><span class="workout-name">Dumbbell Lateral Lunge</span><span class="workout-meta">2 × 10–15</span></div>
+                <div class="workout-row"><span class="workout-name">Dumbbell Hamstring Curl</span><span class="workout-meta">3 × 10–15</span></div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
-
-      <div class="settings-actions">
-        <button class="add-btn" type="button" id="calculateSettings">Calculate recommendation</button>
-        <button class="add-btn" type="button" id="saveSettings">Save settings</button>
-      </div>
-    </div>
-
-    <div class="card pad" style="margin-top:20px">
-      <div class="card-title">
-        <h2>Current profile</h2>
-        <span class="tag">Saved locally</span>
-      </div>
-      <div class="profile-summary">
-        <div class="macro"><b id="summaryWeight">—</b><span>Weight</span></div>
-        <div class="macro"><b id="summaryHeight">—</b><span>Height</span></div>
-        <div class="macro"><b id="summaryRecommended">—</b><span>Recommended</span></div>
-        <div class="macro"><b id="summaryTarget">—</b><span>Daily target</span></div>
-      </div>
-    </div>
-  </section>
-
-
-<section id="workout" class="page">
-  <div class="card pad">
-    <div class="workout-head">
-      <div>
-        <div class="workout-kicker">Strength training schedule</div>
-        <h2 class="workout-title">Workout Plan</h2>
-        <p class="workout-subtitle">Jadwal latihan angkat beban 6 hari. Pilih hari untuk melihat latihan dan tandai gerakan yang sudah selesai.</p>
-      </div>
-      <div class="workout-progress">
-        <strong id="workoutProgress">0%</strong>
-        <span id="workoutProgressText">0 / 0 exercises</span>
-      </div>
-    </div>
-
-    <div class="workout-week" id="workoutWeek"></div>
-
-    <div id="workoutContent"></div>
-
-    <div class="workout-actions">
-      <button type="button" class="workout-btn" id="workoutReset">Reset hari ini</button>
-      <button type="button" class="workout-btn" id="workoutToday">Lihat hari ini</button>
-    </div>
-
-    <div class="workout-note">
-      <b>Catatan:</b> jadwal latihan di atas mengikuti susunan yang kamu berikan. Minggu tidak diberi program pada jadwal sumber, jadi ditampilkan sebagai <b>tidak dijadwalkan</b>, bukan otomatis dianggap rest day.
-    </div>
-  </div>
-</section>
-
-</main>
+    </section>
+  </main>
 </div>
 
-<div class="mobile-nav">
-  <button class="active" data-page="dashboard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c3-1.3 6-1.3 8 0 2-1.3 5-1.3 8 0v13c-3-1.3-6-1.3-8 0-2-1.3-5-1.3-8 0V5Z"/><path d="M12 5v13"/></svg></span>Home</button>
-  <button data-page="add"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/><path d="M12 8v8M8 12h8"/></svg></span>Add</button>
-  <button data-page="analytics"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M11 20V4M18 20v-7"/><path d="M3 20h18"/></svg></span>Stats</button>
-  <button data-page="history"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9l5 5v11H5z"/><path d="M8 11h8M8 14.5h8M8 18h5"/></svg></span>History</button>
-  <button data-page="workout"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h3v8H6zM15 8h3v8h-3z"/><path d="M9 12h6M3.5 10.5H6M18 10.5h2.5M3.5 13.5H6M18 13.5h2.5"/></svg></span>Workout</button>
-  <button data-page="settings"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.57V22h-2.55v-.09a1.7 1.7 0 0 0-1.03-1.57 1.7 1.7 0 0 0-1.88.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 8.1 15a1.7 1.7 0 0 0-1.57-1.03H6.45v-2.55h.08A1.7 1.7 0 0 0 8.1 10.4a1.7 1.7 0 0 0-.34-1.88L7.7 8.46l1.8-1.8.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.57V5h2.55v.49a1.7 1.7 0 0 0 1.03 1.57 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.8 1.8-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.57 1.03H21v2.55h-.49A1.7 1.7 0 0 0 19.4 15Z"/></svg></span>Settings</button>
-</div>
-<div id="toast" class="toast"></div>
+<nav class="mobile-nav">
+  <button class="active" data-page="dashboard"><span class="ic">⌂</span>Home</button>
+  <button data-page="add"><span class="ic">＋</span>Tambah</button>
+  <button data-page="history"><span class="ic">▤</span>Riwayat</button>
+  <button data-page="workout"><span class="ic">✓</span>Latihan</button>
+  <button data-page="profile"><span class="ic">◎</span>Profil</button>
+</nav>
+
+<div class="toast" id="toast"></div>
 
 <script>
-const KEY="calorieAI_entries_v1";
-const TARGET_KEY="calorieAI_target_v1";
-let entries=JSON.parse(localStorage.getItem(KEY)||"[]");
-let target=Number(localStorage.getItem(TARGET_KEY)||2200);
-let selectedDate=new Date().toISOString().slice(0,10);
-let currentMode="both";
+const $ = (s, root=document) => root.querySelector(s);
+const $$ = (s, root=document) => [...root.querySelectorAll(s)];
 
-/* DOM helpers must be initialized before Settings code uses them. */
-const $=s=>document.querySelector(s);
-const $$=s=>document.querySelectorAll(s);
-const save=()=>localStorage.setItem(KEY,JSON.stringify(entries));
-const fmt=n=>Math.round(n).toLocaleString("id-ID");
+const FOOD_KEY = "dapurData_foods_v2";
+const PROFILE_KEY = "dapurData_profile_v2";
+const THEME_KEY = "dapurData_theme_v2";
+const WORKOUT_CHECK_KEY = "dapurData_workout_checklist_v1";
 
-const PROFILE_KEY="dapurData_profile_v1";
-const DEFAULT_TARGET=2200;
-let profile=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");
-let recommendedKcal=Number(profile.recommendedKcal||0);
+const defaultProfile = {weight:86,height:170,age:24,activity:1.55,goal:"loss",target:2000};
+let foods = JSON.parse(localStorage.getItem(FOOD_KEY) || "[]");
+let profile = {...defaultProfile, ...(JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"))};
+let selectedDate = new Date().toISOString().slice(0,10);
 
-function saveProfile(){
-  localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));
+function toast(message){
+  const el=$("#toast");
+  el.textContent=message;
+  el.classList.add("show");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer=setTimeout(()=>el.classList.remove("show"),2200);
 }
-
-function calculateRecommendation(){
-  const weight=Number($("#weightInput").value);
-  const height=Number($("#heightInput").value);
-  const age=Number($("#ageInput").value);
-  const sex=$("#sexInput").value;
-  const activity=Number($("#activityInput").value);
-  const goal=$("#goalInput").value;
-
-  if(!(weight>0&&height>0&&age>0&&activity>0)){
-    toast("Lengkapi berat, tinggi, usia, dan aktivitas terlebih dahulu.");
-    return null;
-  }
-
-  // Mifflin-St Jeor BMR + activity multiplier.
-  const bmr=10*weight+6.25*height-5*age+(sex==="male"?5:-161);
-  const tdee=bmr*activity;
-  let recommendation=tdee;
-  let note="Target pemeliharaan berdasarkan estimasi TDEE.";
-
-  if(goal==="lose"){
-    recommendation=tdee-400;
-    note="Estimasi defisit moderat sekitar 400 kcal/hari untuk membantu penurunan berat badan.";
-  }else if(goal==="gain"){
-    recommendation=tdee+300;
-    note="Estimasi surplus moderat sekitar 300 kcal/hari untuk membantu kenaikan berat badan.";
-  }
-
-  // Keep the recommendation in a practical range.
-  recommendation=Math.max(1200,Math.round(recommendation/50)*50);
-  const bmi=weight/Math.pow(height/100,2);
-
-  recommendedKcal=recommendation;
-  $("#recommendedKcal").textContent=fmt(recommendation)+" kcal";
-  $("#bmrValue").textContent=fmt(bmr)+" kcal";
-  $("#tdeeValue").textContent=fmt(tdee)+" kcal";
-  $("#bmiValue").textContent=bmi.toFixed(1);
-  $("#recommendationNote").textContent=note;
-  return {weight,height,age,sex,activity,goal,bmr,tdee,bmi,recommendation};
+function saveFoods(){localStorage.setItem(FOOD_KEY,JSON.stringify(foods))}
+function dateLabel(date){
+  return new Date(date+"T12:00:00").toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"});
 }
-
-function loadSettingsForm(){
-  $("#weightInput").value=profile.weight??"";
-  $("#heightInput").value=profile.height??"";
-  $("#ageInput").value=profile.age??"";
-  $("#sexInput").value=profile.sex||"male";
-  $("#activityInput").value=String(profile.activity||"1.2");
-  $("#goalInput").value=profile.goal||"lose";
-  $("#targetInput").value=target||DEFAULT_TARGET;
-
-  if(profile.recommendedKcal){
-    recommendedKcal=Number(profile.recommendedKcal);
-    $("#recommendedKcal").textContent=fmt(recommendedKcal)+" kcal";
-    $("#bmrValue").textContent=profile.bmr?fmt(profile.bmr)+" kcal":"—";
-    $("#tdeeValue").textContent=profile.tdee?fmt(profile.tdee)+" kcal":"—";
-    $("#bmiValue").textContent=profile.bmi?Number(profile.bmi).toFixed(1):"—";
-    $("#recommendationNote").textContent=profile.note||"Rekomendasi tersimpan.";
-  }else{
-    $("#recommendedKcal").textContent="— kcal";
-    $("#bmrValue").textContent="—";
-    $("#tdeeValue").textContent="—";
-    $("#bmiValue").textContent="—";
-  }
+function foodsForDate(date){return foods.filter(x=>x.date===date)}
+function totals(date){
+  return foodsForDate(date).reduce((a,x)=>({
+    kcal:a.kcal+(+x.kcal||0),protein:a.protein+(+x.protein||0),
+    carb:a.carb+(+x.carb||0),fat:a.fat+(+x.fat||0)
+  }),{kcal:0,protein:0,carb:0,fat:0});
 }
-
-function renderSettings(){
-  loadSettingsForm();
-  $("#summaryWeight").textContent=profile.weight?`${profile.weight} kg`:"—";
-  $("#summaryHeight").textContent=profile.height?`${profile.height} cm`:"—";
-  $("#summaryRecommended").textContent=profile.recommendedKcal?`${fmt(profile.recommendedKcal)} kcal`:"—";
-  $("#summaryTarget").textContent=fmt(target)+" kcal";
-}
-
-function saveSettings(){
-  const calc=calculateRecommendation();
-  if(!calc)return;
-
-  const customTarget=Number($("#targetInput").value);
-  target=customTarget>=800?Math.round(customTarget):calc.recommendation;
-
-  profile={
-    weight:calc.weight,
-    height:calc.height,
-    age:calc.age,
-    sex:calc.sex,
-    activity:calc.activity,
-    goal:calc.goal,
-    bmr:calc.bmr,
-    tdee:calc.tdee,
-    bmi:calc.bmi,
-    recommendedKcal:calc.recommendation,
-    note:$("#recommendationNote").textContent,
-    updatedAt:new Date().toISOString()
-  };
-
-  localStorage.setItem(TARGET_KEY,String(target));
-  saveProfile();
-  renderDashboard();
-  renderAnalytics();
-  renderSettings();
-  toast("Pengaturan berhasil disimpan.");
-}
-
-$("#calculateSettings").addEventListener("click",calculateRecommendation);
-$("#saveSettings").addEventListener("click",saveSettings);
-
-$$("[data-target-choice]").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    const choice=btn.dataset.targetChoice;
-    if(choice==="recommended"){
-      if(!recommendedKcal){
-        const calc=calculateRecommendation();
-        if(!calc)return;
-      }
-      $("#targetInput").value=recommendedKcal;
-      toast("Target diisi dengan rekomendasi.");
-    }else if(choice==="reset"){
-      $("#targetInput").value=DEFAULT_TARGET;
-      toast("Target dikembalikan ke 2200 kcal.");
-    }else{
-      $("#targetInput").focus();
-    }
-  });
-});
-
-
-/* ---- pengaturan mode terang / gelap (key sendiri, tidak menyentuh data makanan) ---- */
-const THEME_KEY="dapurData_theme_v1";
-function setThemeState(mode){
-  document.documentElement.setAttribute("data-theme",mode);
-  localStorage.setItem(THEME_KEY,mode);
-  const lightBtn=$("#themeLight"),darkBtn=$("#themeDark");
-  if(lightBtn&&darkBtn){
-    lightBtn.classList.toggle("active",mode==="light");
-    darkBtn.classList.toggle("active",mode==="dark");
-    lightBtn.setAttribute("aria-pressed",String(mode==="light"));
-    darkBtn.setAttribute("aria-pressed",String(mode==="dark"));
-  }
-}
-function applyTheme(mode,evt){
-  if(mode===document.documentElement.getAttribute("data-theme"))return;
-  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(!document.startViewTransition||reduce){setThemeState(mode);return}
-  const x=evt?evt.clientX:window.innerWidth/2;
-  const y=evt?evt.clientY:window.innerHeight/2;
-  const endRadius=Math.hypot(Math.max(x,window.innerWidth-x),Math.max(y,window.innerHeight-y));
-  const transition=document.startViewTransition(()=>setThemeState(mode));
-  transition.ready.then(()=>{
-    document.documentElement.animate(
-      {clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${endRadius}px at ${x}px ${y}px)`]},
-      {duration:620,easing:"cubic-bezier(.2,.7,.2,1)",pseudoElement:"::view-transition-new(root)"}
-    );
-  });
-}
-const storedTheme=localStorage.getItem(THEME_KEY);
-const prefersDark=window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-setThemeState(storedTheme||(prefersDark?"dark":"light"));
-$("#themeLight").addEventListener("click",e=>applyTheme("light",e));
-$("#themeDark").addEventListener("click",e=>applyTheme("dark",e));
-
-function showPage(page){
-  $$(".page").forEach(x=>x.classList.toggle("active",x.id===page));
-  $$(".nav button,.mobile-nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));
-  const titles={dashboard:"Good evening 👋",add:"Analyze your food",analytics:"Your analytics",history:"Food history",settings:"Profile & Settings",workout:"Workout Plan"};
-  $("#pageTitle").textContent=titles[page]||"Calorie AI";
-  if(page==="analytics")renderAnalytics();
-  if(page==="history")renderHistory();
-  if(page==="settings")renderSettings();
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-$$("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
-
-$("#dateInput").value=selectedDate;
-$("#dateInput").addEventListener("change",e=>{selectedDate=e.target.value;renderDashboard()});
-$("#prevDate").onclick=()=>moveDate(-1);
-$("#nextDate").onclick=()=>moveDate(1);
-function moveDate(n){
-  const d=new Date(selectedDate+"T12:00:00");d.setDate(d.getDate()+n);
-  selectedDate=d.toISOString().slice(0,10);$("#dateInput").value=selectedDate;renderDashboard();
-}
-$("#choosePhotoBtn").addEventListener("click",()=>{
-  const input=$("#foodPhoto");
-  // Explicitly open the native mobile camera/gallery picker.
-  input.click();
-});
-
-$("#foodPhoto").addEventListener("change",e=>{
-  const f=e.target.files && e.target.files[0];
-  if(!f)return;
-  if(!f.type.startsWith("image/")){
-    toast("File harus berupa gambar.");
-    e.target.value="";
-    return;
-  }
-  const maxSize=12*1024*1024;
-  if(f.size>maxSize){
-    toast("Ukuran foto maksimal 12 MB.");
-    e.target.value="";
-    return;
-  }
-  $("#photoStatus").textContent=`Foto dipilih: ${f.name}`;
-  const r=new FileReader();
-  r.onload=()=>{
-    $("#preview").src=r.result;
-    $("#preview").style.display="block";
-  };
-  r.onerror=()=>toast("Foto tidak dapat dibaca.");
-  r.readAsDataURL(f);
-});
-$$(".mode button").forEach(b=>b.onclick=()=>{
-  currentMode=b.dataset.mode;
-  $$(".mode button").forEach(x=>x.classList.toggle("active",x===b));
-  $("#photoField").style.display=currentMode==="text"?"none":"block";
-  $("#textField").style.display=currentMode==="photo"?"none":"block";
-});
-
-function getDayEntries(date=selectedDate){return entries.filter(e=>e.date===date)}
 function renderDashboard(){
-  const day=getDayEntries(), total=day.reduce((s,e)=>s+e.kcal,0);
-  const p=day.reduce((s,e)=>s+e.protein,0),c=day.reduce((s,e)=>s+e.carbs,0),f=day.reduce((s,e)=>s+e.fat,0);
-  $("#totalKcal").innerHTML=`${fmt(total)} <small>kcal</small>`;
-  $("#targetText").textContent=fmt(target);
-  $("#calProgress").style.width=Math.min(total/target*100,100)+"%";
-  $("#protein").textContent=Math.round(p)+"g";$("#carbs").textContent=Math.round(c)+"g";$("#fat").textContent=Math.round(f)+"g";
-  $("#mealCount").textContent=day.length+" items";
-  $("#mealList").innerHTML=day.length?day.map((e,i)=>`
-    <div class="meal"><div class="food-icon">${e.icon||"🍽️"}</div><div class="meal-main"><b>${esc(e.name)}</b><span>${e.meal} · ${e.score}/10</span></div><div class="meal-kcal">${fmt(e.kcal)} kcal</div><button class="remove" onclick="removeEntry(${i})">×</button></div>`).join(""):`<div class="empty">Belum ada makanan pada tanggal ini.<br>Tambahkan makanan untuk mulai tracking.</div>`;
-  if(!day.length){$("#dailyInsight").textContent="Tambahkan makanan untuk mendapatkan analisis AI harian.";$("#dailyTip").textContent="Catat makanan segera setelah makan agar estimasi harian lebih akurat."}
-  else{
-    const remaining=target-total;
-    $("#dailyInsight").textContent=remaining>=0?`Kamu sudah mengonsumsi ${fmt(total)} kcal. Masih ada sekitar ${fmt(remaining)} kcal dari target hari ini.`:`Kamu sudah melewati target sekitar ${fmt(Math.abs(remaining))} kcal. Fokus pada porsi dan pilihan makanan berikutnya.`;
-    $("#dailyTip").textContent=p<target*.05? "Pertimbangkan menambah sumber protein pada makanan berikutnya.":"Usahakan setiap makan memiliki sumber protein dan porsi yang sesuai target.";
+  const list=foodsForDate(selectedDate), t=totals(selectedDate);
+  $("#totalKcal").textContent=Math.round(t.kcal).toLocaleString("id-ID");
+  $("#targetKcal").textContent=Math.round(profile.target).toLocaleString("id-ID")+" kcal";
+  $("#remainingKcal").textContent=Math.max(0,Math.round(profile.target-t.kcal)).toLocaleString("id-ID");
+  $("#proteinTotal").textContent=Math.round(t.protein)+" g";
+  $("#carbTotal").textContent=Math.round(t.carb)+" g";
+  $("#fatTotal").textContent=Math.round(t.fat)+" g";
+  $("#mealCount").textContent=list.length;
+  $("#mealDateLabel").textContent=dateLabel(selectedDate);
+  $("#ticketNo").textContent="TICKET #"+selectedDate.replaceAll("-","");
+
+  const pct=profile.target?Math.min(100,Math.round(t.kcal/profile.target*100)):0;
+  $("#calorieProgress").style.width=pct+"%";
+
+  const mealList=$("#mealList");
+  if(!list.length){
+    mealList.innerHTML='<div class="empty">Belum ada makanan pada tanggal ini.</div>';
+  }else{
+    mealList.innerHTML=list.map(x=>`
+      <div class="meal">
+        <div class="food-icon">◉</div>
+        <div class="meal-main"><b>${escapeHtml(x.name)}</b><span>${escapeHtml(x.time||"")} ${x.note?"· "+escapeHtml(x.note):""}</span></div>
+        <div class="meal-kcal">${Math.round(x.kcal)} kcal</div>
+        <button class="remove" type="button" data-remove="${x.id}" aria-label="Hapus">×</button>
+      </div>`).join("");
   }
 }
-function removeEntry(index){
-  const day=getDayEntries();
-  if(!day[index]) return;
-  const id=day[index].id;
-  entries=entries.filter(e=>e.id!==id);
-  save();
-  renderDashboard();
-  toast("Makanan dihapus");
-}
-window.removeEntry=removeEntry;
-async function analyzeFood(){
-  const desc=$("#description").value.trim();
-  const photo=$("#foodPhoto").files[0];
-  const manual=Number($("#manualKcal").value);
-  const button=document.querySelector('.form-grid .full button[onclick="analyzeFood()"]');
-
-  if(currentMode==="photo"&&!photo)return toast("Upload foto terlebih dahulu");
-  if(currentMode==="text"&&!desc)return toast("Tulis deskripsi makanan terlebih dahulu");
-  if(currentMode==="both"&&!photo&&!desc)return toast("Masukkan foto atau deskripsi");
-
-  const form=new FormData();
-  if(desc) form.append("description",desc);
-  if(photo) form.append("photo",photo);
-
-  const resultBox=$("#aiResult");
-  const originalText=button?button.innerHTML:"Analyze with AI";
-  if(button){
-    button.disabled=true;
-    button.style.opacity=".7";
-    button.innerHTML="<span class=\"ai-spinner\"></span> Menganalisis dengan Gemini…";
-  }
-  resultBox.style.display="block";
-  resultBox.innerHTML='<div class="ai-loading"><span class="ai-spinner"></span><div><b>Menganalisis dengan Gemini…</b><div class="muted" style="font-size:12px;margin-top:3px">Foto dan/atau deskripsi sedang dianalisis.</div></div></div>';
-
-  try{
-    const response=await fetch("/api/analyze-food",{method:"POST",body:form});
-    let data=null;
-    try{data=await response.json()}catch{throw new Error("Backend mengembalikan respons yang tidak valid.")}
-    if(!response.ok) throw new Error(data?.error||`Analisis gagal (${response.status}).`);
-
-    const foods=Array.isArray(data.foods)?data.foods:[];
-    const total=data.total||{};
-    const score=Math.max(0,Math.min(10,Number(data.score)||0));
-    const confidence=Math.max(0,Math.min(1,Number(data.confidence)||0));
-    const label=data.label||"Cukup";
-    const level=score>=8?"good":score>=6?"mid":"bad";
-    const iconFor=name=>{
-      const t=String(name).toLowerCase();
-      if(/nasi|rice/.test(t))return "🍚";
-      if(/ayam|chicken/.test(t))return "🍗";
-      if(/telur|egg/.test(t))return "🥚";
-      if(/mie|mi |noodle/.test(t))return "🍜";
-      if(/roti|bread/.test(t))return "🍞";
-      if(/tempe/.test(t))return "🫘";
-      if(/tahu|tofu/.test(t))return "🧈";
-      if(/kopi|coffee/.test(t))return "☕";
-      if(/teh|tea/.test(t))return "🍵";
-      if(/susu|milk/.test(t))return "🥛";
-      if(/pizza/.test(t))return "🍕";
-      if(/burger/.test(t))return "🍔";
-      return "🍽️";
-    };
-    const portion=f=>f.portion_g!=null?`${fmt(f.portion_g)} g`:f.portion_ml!=null?`${fmt(f.portion_ml)} ml`:"Porsi tidak diketahui";
-    const foodsHtml=foods.length?`<div class="ai-food-list">${foods.map(f=>`<div class="ai-food"><div><b>${esc(f.name)}</b><small>${portion(f)} · Confidence ${Math.round((Number(f.confidence)||0)*100)}%</small></div><strong>${fmt(Number(f.calories)||0)} kcal</strong></div>`).join("")}</div>`:"<div class=\"muted\" style=\"margin-top:12px\">Gemini tidak menemukan item makanan yang dapat diidentifikasi.</div>";
-
-    const result={
-      id:crypto.randomUUID?crypto.randomUUID():Date.now(),
-      date:selectedDate,
-      name:foods.length===1?foods[0].name:(foods.length?"Mixed meal":"Food analysis"),
-      meal:$("#mealType").value,
-      kcal:manual>0?manual:Number(total.calories)||0,
-      protein:Number(total.protein_g)||0,
-      carbs:Number(total.carbs_g)||0,
-      fat:Number(total.fat_g)||0,
-      score:Math.round(score*10)/10,
-      icon:foods.length===1?iconFor(foods[0].name):"🍱",
-      source:photo&&desc?"photo+description":photo?"photo":"description",
-      assessment:data.assessment||"",
-      suggestion:data.suggestion||"",
-      confidence:confidence
-    };
-
-    resultBox.innerHTML=`<div class="result-head"><div><div class="muted">Gemini AI estimate</div><div style="font-size:25px;font-weight:850;margin-top:4px">${esc(result.name)}</div><div class="muted" style="font-size:12px;margin-top:5px">Confidence keseluruhan: ${Math.round(confidence*100)}%</div></div><div class="score">${score.toFixed(score%1?1:0)}/10 <span class="badge ${level}">${esc(label)}</span></div></div>
-      ${foodsHtml}
-      <div class="macro-grid" style="margin-top:18px"><div class="macro"><b>${fmt(result.kcal)}</b><span>Calories${manual>0?" (manual)":""}</span></div><div class="macro"><b>${Math.round(result.protein)}g</b><span>Protein</span></div><div class="macro"><b>${Math.round(result.carbs)}g</b><span>Carbs</span></div></div>
-      <div class="macro-grid" style="margin-top:12px"><div class="macro"><b>${Math.round(result.fat)}g</b><span>Fat</span></div><div class="macro"><b>${foods.length}</b><span>Items detected</span></div><div class="macro"><b>${esc(result.source)}</b><span>Input</span></div></div>
-      <div class="suggestion"><b>AI assessment</b><br>${esc(result.assessment)}<br><br><b>Suggestion</b><br>${esc(result.suggestion)}</div>
-      <button class="add-btn" style="margin-top:15px" id="saveAI">＋ Save to ${selectedDate}</button>`;
-
-    $("#saveAI").onclick=()=>{
-      entries.push(result);save();
-      $("#aiResult").style.display="none";
-      $("#description").value="";$("#manualKcal").value="";$("#foodPhoto").value="";
-      $("#photoStatus").textContent="Belum ada foto dipilih.";
-      $("#preview").src="";$("#preview").style.display="none";
-      showPage("dashboard");renderDashboard();toast("Hasil Gemini berhasil disimpan");
-    };
-  }catch(err){
-    console.error("Gemini analyze error:",err);
-    resultBox.innerHTML=`<div class="ai-error"><b>Analisis Gemini gagal</b><br>${esc(err?.message||"Terjadi kesalahan saat menghubungi backend.")}<br><small style="display:block;margin-top:8px">Cek terminal Node.js untuk detail error.</small></div>`;
-  }finally{
-    if(button){
-      button.disabled=false;
-      button.style.opacity="";
-      button.innerHTML=originalText;
-    }
-  }
-}
-
-function renderAnalytics(){
-
-  const now=new Date(selectedDate+"T12:00:00"), week=[];
-  for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);const date=d.toISOString().slice(0,10);week.push({date,total:getDayEntries(date).reduce((s,e)=>s+e.kcal,0),label:d.toLocaleDateString("id-ID",{weekday:"short"})})}
-  const vals=week.map(x=>x.total), avg=vals.reduce((a,b)=>a+b,0)/7;
-  const month=selectedDate.slice(0,7), monthDays=entries.filter(e=>e.date.startsWith(month)), days=[...new Set(monthDays.map(e=>e.date))];
-  const mavg=days.length?monthDays.reduce((s,e)=>s+e.kcal,0)/days.length:0;
-  $("#weekAvg").textContent=fmt(avg)+" kcal";$("#monthAvg").textContent=fmt(mavg)+" kcal";$("#daysTracked").textContent=days.length;
-  $("#weekChart").innerHTML=week.map(x=>`<div class="bar-wrap"><div style="height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;width:100%"><div class="bar" style="height:${Math.max(4,Math.min(100,x.total/target*100))}%"></div><span class="day-label">${x.label}</span></div></div>`).join("");
-  const monthName=now.toLocaleDateString("id-ID",{month:"long",year:"numeric"});$("#monthLabel").textContent=monthName;
-  $("#monthInsight").textContent=days.length?`Bulan ini kamu sudah mencatat ${days.length} hari dengan rata-rata ${fmt(mavg)} kcal/hari. Target harianmu ${fmt(target)} kcal. ${mavg<=target?"Rata-rata masih berada di sekitar atau di bawah target.":"Rata-rata berada di atas target, jadi porsi dan pilihan makanan bisa diperhatikan lebih lanjut."}`:"Belum ada data bulan ini.";
+function escapeHtml(v){
+  return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 }
 function renderHistory(){
-  const sorted=[...entries].sort((a,b)=>b.date.localeCompare(a.date));
-  $("#historyBody").innerHTML=sorted.length?sorted.map(e=>`<tr><td>${e.date}</td><td>${esc(e.icon||"🍽️")} ${esc(e.name)}</td><td>${e.meal}</td><td>${fmt(e.kcal)} kcal</td><td>${e.score}/10</td></tr>`).join(""):`<tr><td colspan="5" style="text-align:center;padding:35px">Belum ada riwayat.</td></tr>`;
+  const rows=[...foods].sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  $("#historyBody").innerHTML=rows.length?rows.map(x=>`
+    <tr>
+      <td>${dateLabel(x.date)}</td><td>${escapeHtml(x.name)}</td>
+      <td>${Math.round(x.kcal)} kcal</td>
+      <td>P ${Math.round(x.protein||0)} · C ${Math.round(x.carb||0)} · F ${Math.round(x.fat||0)}</td>
+      <td><button class="remove" data-remove="${x.id}" type="button">×</button></td>
+    </tr>`).join(""):'<tr><td colspan="5">Belum ada data.</td></tr>';
 }
-function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
-renderDashboard();renderAnalytics();renderHistory();renderSettings();
+function renderStats(){
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(selectedDate+"T12:00:00"); d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10);
+    days.push({key,total:totals(key).kcal,label:d.toLocaleDateString("id-ID",{weekday:"short"}).slice(0,3)});
+  }
+  const avg=days.reduce((a,x)=>a+x.total,0)/7;
+  $("#avg7").textContent=Math.round(avg).toLocaleString("id-ID")+" kcal";
+  $("#allMealCount").textContent=foods.length;
+  $("#statsTarget").textContent=Math.round(profile.target).toLocaleString("id-ID");
+  const max=Math.max(profile.target,...days.map(x=>x.total),1);
+  $("#chart").innerHTML=days.map(x=>`
+    <div class="bar-wrap" title="${dateLabel(x.key)} — ${Math.round(x.total)} kcal">
+      <div class="bar" style="height:${Math.max(2,Math.round(x.total/max*100))}%"></div>
+      <span class="day-label">${x.label}</span>
+    </div>`).join("");
+}
+function calcProfile(){
+  const w=+$("#profileWeight").value||86,h=+$("#profileHeight").value||170,a=+$("#profileAge").value||24,act=+$("#profileActivity").value||1.55;
+  const bmr=10*w+6.25*h-5*a+5, tdee=bmr*act;
+  let target=tdee;
+  if(profile.goal==="loss") target=tdee-500;
+  if(profile.goal==="gain") target=tdee+250;
+  target=Math.round(target/50)*50;
+  profile.target=Math.max(1200,target);
+  $("#bmrValue").textContent=Math.round(bmr).toLocaleString("id-ID");
+  $("#tdeeValue").textContent=Math.round(tdee).toLocaleString("id-ID");
+  $("#recommendedKcal").textContent=profile.target.toLocaleString("id-ID");
+  $("#recommendedProtein").textContent=Math.round(w*1.8)+" g";
+  $("#recommendedFat").textContent=Math.round(w*.7)+" g";
+}
+function renderProfile(){
+  $("#profileWeight").value=profile.weight;
+  $("#profileHeight").value=profile.height;
+  $("#profileAge").value=profile.age;
+  $("#profileActivity").value=profile.activity;
+  $$(".target-option").forEach(b=>b.classList.toggle("active",b.dataset.goal===profile.goal));
+  calcProfile();
+}
+function navigate(page){
+  $$(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+page));
+  $$("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+  const titles={dashboard:["Dashboard","Pantau asupan kalori dan progresmu hari ini."],add:["Tambah Makanan","Masukkan makanan dan nilai nutrisinya."],history:["Riwayat","Semua catatan makanan yang tersimpan."],stats:["Statistik","Lihat pola asupan 7 hari terakhir."],profile:["Profil & Target","Atur data tubuh dan target kalorimu."],workout:["Latihan","Centang latihan yang sudah selesai."]};
+  $("#pageTitle").textContent=titles[page][0];
+  $("#pageSubtitle").textContent=titles[page][1];
+  if(page==="stats")renderStats();
+}
+function initWorkoutChecklist(){
+  const checks=$$(".workout-static-list .workout-check");
+  let saved=[];
+  try{saved=JSON.parse(localStorage.getItem(WORKOUT_CHECK_KEY)||"[]")||[]}catch{}
 
-/* ---- subtle receipt tilt on the hero card (purely decorative, respects reduced-motion) ---- */
-(function(){
-  const card=$(".calorie-card");
-  if(!card) return;
-  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const fine=window.matchMedia("(pointer: fine)").matches;
-  if(reduce||!fine) return;
-  card.style.transition="transform .25s ease";
-  card.addEventListener("mousemove",e=>{
-    const r=card.getBoundingClientRect();
-    const x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
-    card.style.transform=`rotateX(${(-y*1.6).toFixed(2)}deg) rotateY(${(x*1.6).toFixed(2)}deg)`;
+  checks.forEach((cb,i)=>{
+    cb.checked=!!saved[i];
+    cb.closest(".workout-superset")?.classList.toggle("done",cb.checked);
+
+    cb.addEventListener("change",()=>{
+      const state=checks.map(x=>x.checked);
+      localStorage.setItem(WORKOUT_CHECK_KEY,JSON.stringify(state));
+      cb.closest(".workout-superset")?.classList.toggle("done",cb.checked);
+      updateWorkoutProgress();
+      updateWorkoutDayCounts();
+    });
   });
-  card.addEventListener("mouseleave",()=>{card.style.transform="rotateX(0) rotateY(0)"});
-})();
 
-/* ---------- workout schedule ---------- */
-const WORKOUT_KEY="dapurData_workout_v1";
-const workoutPlan={"1": ["DAY 1", "PUSH", [["Dumbbell Floor Press", "3 × 8–12"], ["Dumbbell Lateral Raise (Standing)", "3 × 10–15"], ["Single-Arm Dumbbell Shoulder Press", "3 × 8–12"], ["Dumbbell Overhead Tricep Extension (Standing)", "3 × 10–15"], ["Dumbbell Fly", "3 × 12–15"], ["Front Raise (Alternating Dumbbell)", "3 × 10–15"], ["Dumbbell Pullover (Lying on Floor)", "2 × 10–15"], ["Dumbbell Tricep Kickback (Standing)", "2 × 12–15"]]], "2": ["DAY 2", "PULL", [["Single-Arm Dumbbell Row (Bent Over)", "3 × 8–12"], ["Hammer Curl (Standing)", "3 × 10–15"], ["Renegade Row", "3 × 10–15"], ["Single-Arm Dumbbell Curl (Standing)", "3 × 8–12"], ["Dumbbell Reverse Fly (Bent Over)", "3 × 10–15"], ["Wrist Curl (Seated or Standing)", "2 × 15–20"], ["Concentration Curl (Seated on Floor)", "2 × 12–15"], ["Reverse Wrist Curl (Seated or Standing)", "2 × 15–20"]]], "3": ["DAY 3", "LEGS A", [["Goblet Squat", "3 × 10–15"], ["Single Dumbbell Calf Raise (Standing)", "3 × 12–20"], ["Bulgarian Split Squat", "3 × 8–12"], ["Hanging Leg Raise", "3 × 10–15"], ["Dumbbell Romanian Deadlift", "3 × 8–12"], ["Plank", "2 × 30–60 detik"], ["Dumbbell Hip Thrust / Glute Bridge", "3 × 10–15"]]], "4": ["DAY 4", "REST", []], "5": ["DAY 5", "UPPER", [["Dumbbell Floor Press", "3 × 8–12"], ["Dumbbell Lateral Raise (Standing)", "3 × 12–20"], ["Single-Arm Dumbbell Row (Bent Over)", "3 × 8–12"], ["Dumbbell Front Raise", "2 × 12–15"], ["Single-Arm Dumbbell Shoulder Press", "2 × 8–12"], ["Hammer Curl (Standing)", "2 × 10–15"], ["Dumbbell Reverse Fly (Bent Over)", "2 × 12–20"], ["Dumbbell Overhead Tricep Extension", "2 × 10–15"], ["Dumbbell Fly", "2 × 12–15"], ["Dumbbell Shrug", "2 × 10–15"]]], "6": ["DAY 6", "LOWER B", [["Dumbbell Reverse Lunge", "3 × 8–12"], ["Single Dumbbell Calf Raise (Standing)", "3 × 15–20"], ["Dumbbell Sumo Squat", "3 × 10–15"], ["Weighted Leg Raise", "3 × 10–15"], ["Single-Leg Dumbbell Deadlift", "3 × 8–12"], ["One-Arm Plank", "2 × 30–45 detik"], ["Dumbbell Hip Thrust / Glute Bridge", "3 × 10–15"], ["Seated Dumbbell Calf Raise", "3 × 15–20"], ["Dumbbell Lateral Lunge", "2 × 10–15"], ["Dumbbell Hamstring Curl", "3 × 10–15"]]]};
-let workoutSelectedDay=new Date().getDay();
-if(workoutSelectedDay===0) workoutSelectedDay=7;
+  $$(".workout-day-toggle").forEach(toggle=>{
+    toggle.addEventListener("click",()=>{
+      const item=toggle.closest(".workout-accordion-item");
+      const open=item.classList.toggle("open");
+      toggle.setAttribute("aria-expanded",open?"true":"false");
+    });
+  });
 
-function workoutStorage(){
-  try{return JSON.parse(localStorage.getItem(WORKOUT_KEY)||"{}")||{}}catch(e){return {}}
-}
-function workoutSave(state){localStorage.setItem(WORKOUT_KEY,JSON.stringify(state))}
-
-function renderWorkoutWeek(){
-  const labels={1:"Sen",2:"Sel",3:"Rab",4:"Kam",5:"Jum",6:"Sab",7:"Min"};
-  const wrap=$("#workoutWeek");
-  if(!wrap)return;
-  wrap.innerHTML=Array.from({length:7},(_,i)=>{
-    const d=i+1;
-    const plan=workoutPlan[d];
-    const isToday=d===((new Date().getDay()||7));
-    return `<button type="button" class="workout-day-btn ${d===workoutSelectedDay?"active ":""}${isToday?"today":""}" data-workout-day="${d}">
-      ${labels[d]}<br><strong>${plan?plan[0].replace("DAY ","D"):"—"}</strong>
-    </button>`;
-  }).join("");
-  $$("[data-workout-day]").forEach(btn=>btn.addEventListener("click",()=>{
-    workoutSelectedDay=Number(btn.dataset.workoutDay);
-    renderWorkout();
-  }));
+  updateWorkoutProgress();
+  updateWorkoutDayCounts();
 }
 
-function renderWorkout(){
-  renderWorkoutWeek();
-  const content=$("#workoutContent");
-  if(!content)return;
-  const plan=workoutPlan[workoutSelectedDay];
-  const state=workoutStorage();
-  const completed=state[workoutSelectedDay]||{};
-
-  if(!plan){
-    content.innerHTML=`<div class="workout-rest"><strong>Tidak dijadwalkan</strong><span>Tidak ada latihan yang ditentukan untuk hari Minggu pada jadwal ini.</span></div>`;
-    $("#workoutProgress").textContent="—";
-    $("#workoutProgressText").textContent="No scheduled workout";
-    return;
-  }
-
-  const [dayName,focus,exercises]=plan;
-  if(!exercises.length){
-    content.innerHTML=`<div class="workout-rest"><strong>DAY 4 — REST</strong><span>Hari istirahat sesuai jadwal latihan.</span></div>`;
-    $("#workoutProgress").textContent="—";
-    $("#workoutProgressText").textContent="Rest day";
-    return;
-  }
-
-  const doneCount=exercises.reduce((n,_,i)=>n+(completed[i]?1:0),0);
-  const pct=Math.round(doneCount/exercises.length*100);
+function updateWorkoutDayCounts(){
+  $$(".workout-accordion-item").forEach(item=>{
+    const checks=$$(".workout-check",item);
+    const counter=$(".day-completion",item);
+    if(!counter)return;
+    if(!checks.length){
+      counter.textContent="REST";
+      return;
+    }
+    const done=checks.filter(c=>c.checked).length;
+    counter.textContent=`${done} / ${checks.length}`;
+  });
+}
+function updateWorkoutProgress(){
+  const checks=$$(".workout-static-list .workout-check");
+  const done=checks.filter(c=>c.checked).length,total=checks.length;
+  const pct=total?Math.round(done/total*100):0;
   $("#workoutProgress").textContent=pct+"%";
-  $("#workoutProgressText").textContent=`${doneCount} / ${exercises.length} exercises`;
-
-  content.innerHTML=`
-    <div class="workout-kicker">${dayName}</div>
-    <h3 style="font-family:var(--display);font-size:22px;margin:4px 0 0">${focus}</h3>
-    <div class="workout-list">
-      ${exercises.map((item,i)=>{
-        const checked=!!completed[i];
-        return `<label class="workout-row ${checked?"done":""}">
-          <input class="workout-check" type="checkbox" data-workout-index="${i}" ${checked?"checked":""}>
-          <span class="workout-exercise">${item[0]}<small>Exercise ${i+1}</small></span>
-          <span class="workout-reps">${item[1]}</span>
-        </label>`;
-      }).join("")}
-    </div>`;
-
-  $$("[data-workout-index]").forEach(cb=>cb.addEventListener("change",e=>{
-    const idx=e.target.dataset.workoutIndex;
-    const next=workoutStorage();
-    next[workoutSelectedDay]=next[workoutSelectedDay]||{};
-    next[workoutSelectedDay][idx]=e.target.checked;
-    workoutSave(next);
-    renderWorkout();
-  }));
+  $("#workoutProgressText").textContent=`${done} / ${total} exercises`;
 }
 
-$("#workoutReset")?.addEventListener("click",()=>{
-  const state=workoutStorage();
-  delete state[workoutSelectedDay];
-  workoutSave(state);
-  renderWorkout();
-  toast("Checklist latihan direset.");
-});
-$("#workoutToday")?.addEventListener("click",()=>{
-  workoutSelectedDay=(new Date().getDay()||7);
-  renderWorkout();
+$$("[data-page]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.page)));
+$("#quickAdd").onclick=()=>navigate("add");
+$("#cancelFood").onclick=()=>navigate("dashboard");
+
+$("#foodForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  foods.push({
+    id:Date.now().toString(),date:selectedDate,
+    name:$("#foodName").value.trim(),kcal:+$("#foodKcal").value||0,
+    protein:+$("#foodProtein").value||0,carb:+$("#foodCarb").value||0,fat:+$("#foodFat").value||0,
+    time:$("#foodTime").value,note:$("#foodNote").value.trim()
+  });
+  saveFoods(); e.target.reset(); renderDashboard(); renderHistory(); toast("Makanan disimpan."); navigate("dashboard");
 });
 
-renderWorkout();
+document.addEventListener("click",e=>{
+  const btn=e.target.closest("[data-remove]");
+  if(!btn)return;
+  const id=btn.dataset.remove;
+  foods=foods.filter(x=>x.id!==id); saveFoods();
+  renderDashboard();renderHistory();renderStats();toast("Makanan dihapus.");
+});
 
+$("#dateInput").value=selectedDate;
+$("#dateInput").addEventListener("change",e=>{selectedDate=e.target.value||selectedDate;renderDashboard();renderStats()});
+$("#prevDate").onclick=()=>{const d=new Date(selectedDate+"T12:00:00");d.setDate(d.getDate()-1);selectedDate=d.toISOString().slice(0,10);$("#dateInput").value=selectedDate;renderDashboard();};
+$("#nextDate").onclick=()=>{const d=new Date(selectedDate+"T12:00:00");d.setDate(d.getDate()+1);selectedDate=d.toISOString().slice(0,10);$("#dateInput").value=selectedDate;renderDashboard();};
+
+function setTheme(theme){
+  document.documentElement.dataset.theme=theme==="dark"?"dark":"light";
+  $("#lightTheme").classList.toggle("active",theme!=="dark");
+  $("#darkTheme").classList.toggle("active",theme==="dark");
+  localStorage.setItem(THEME_KEY,theme);
+}
+
+function applyTheme(theme, sourceButton=null){
+  const root=document.documentElement;
+  const nextTheme=theme==="dark"?"dark":"light";
+
+  if(root.dataset.theme===nextTheme){
+    setTheme(nextTheme);
+    return;
+  }
+
+  const reduceMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if(!document.startViewTransition || reduceMotion){
+    setTheme(nextTheme);
+    return;
+  }
+
+  const button=sourceButton || (nextTheme==="dark"?$("#darkTheme"):$("#lightTheme"));
+  const rect=button.getBoundingClientRect();
+  const x=rect.left + rect.width/2;
+  const y=rect.top + rect.height/2;
+
+  root.style.setProperty("--theme-x",`${x}px`);
+  root.style.setProperty("--theme-y",`${y}px`);
+
+  document.startViewTransition(()=>{
+    setTheme(nextTheme);
+  });
+}
+
+$("#lightTheme").onclick=(e)=>applyTheme("light",e.currentTarget);
+$("#darkTheme").onclick=(e)=>applyTheme("dark",e.currentTarget);
+
+$$(".target-option").forEach(b=>b.addEventListener("click",()=>{
+  profile.goal=b.dataset.goal;
+  $$(".target-option").forEach(x=>x.classList.toggle("active",x===b));
+  calcProfile();
+}));
+$("#profileForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  profile.weight=+$("#profileWeight").value||86;
+  profile.height=+$("#profileHeight").value||170;
+  profile.age=+$("#profileAge").value||24;
+  profile.activity=+$("#profileActivity").value||1.55;
+  calcProfile();
+  localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));
+  renderDashboard();renderStats();toast("Profil dan target disimpan.");
+});
+
+$("#workoutReset").onclick=()=>{
+  const checks=$$(".workout-static-list .workout-check");
+  checks.forEach(c=>{c.checked=false;c.closest(".workout-row")?.classList.remove("done")});
+  localStorage.removeItem(WORKOUT_CHECK_KEY);$$(".workout-check").forEach(c=>{c.checked=false;c.closest(".workout-superset")?.classList.remove("done")});updateWorkoutProgress();updateWorkoutDayCounts();toast("Semua checklist latihan direset.");
+};
+
+applyTheme(localStorage.getItem(THEME_KEY)||"light");
+renderProfile();renderDashboard();renderHistory();renderStats();initWorkoutChecklist();
 </script>
 </body>
 </html>
