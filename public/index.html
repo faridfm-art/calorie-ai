@@ -217,6 +217,36 @@ button{cursor:pointer}
 .remove:hover{color:var(--paper);background:var(--ink);transform:rotate(90deg)}
 .empty{text-align:center;padding:38px 15px;color:var(--ink-45);border:1.5px dashed var(--line-strong);font-family:var(--stamp);font-size:13px}
 
+
+/* ---------- profile / calorie settings ---------- */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.settings-section{margin-top:20px}
+.settings-result{
+  margin-top:18px;padding:18px;border:1.5px solid var(--ink);
+  background:var(--paper-2);box-shadow:var(--shadow-paper);
+}
+.settings-result .recommendation{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px
+}
+.settings-number{font-family:var(--mono);font-size:24px;font-weight:800}
+.settings-note{font-size:12px;color:var(--ink-45);line-height:1.55;margin-top:8px}
+.target-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.target-option{
+  border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);
+  padding:11px 8px;text-align:center;font-weight:700;cursor:pointer;
+}
+.target-option:hover,.target-option.active{background:var(--ink);color:var(--paper)}
+.settings-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:18px}
+.profile-summary{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px
+}
+.profile-summary .macro{padding:14px 10px}
+@media(max-width:560px){
+  .settings-grid{grid-template-columns:1fr}
+  .settings-result .recommendation,.profile-summary{grid-template-columns:1fr 1fr}
+  .target-options{grid-template-columns:1fr}
+}
+
 /* ---------- stats / analytics ---------- */
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
 .stat{padding:19px;background:var(--paper);border:1.5px solid var(--ink);box-shadow:var(--shadow-paper);transition:transform .18s ease}
@@ -362,6 +392,7 @@ select option{background:var(--paper);color:var(--ink)}
     <button data-page="add"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/><path d="M12 8v8M8 12h8"/></svg></span> Add Food</button>
     <button data-page="analytics"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M11 20V4M18 20v-7"/><path d="M3 20h18"/></svg></span> Analytics</button>
     <button data-page="history"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9l5 5v11H5z"/><path d="M8 11h8M8 14.5h8M8 18h5"/></svg></span> History</button>
+    <button data-page="settings"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.57V22h-2.55v-.09a1.7 1.7 0 0 0-1.03-1.57 1.7 1.7 0 0 0-1.88.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 8.1 15a1.7 1.7 0 0 0-1.57-1.03H6.45v-2.55h.08A1.7 1.7 0 0 0 8.1 10.4a1.7 1.7 0 0 0-.34-1.88L7.7 8.46l1.8-1.8.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.57V5h2.55v.49a1.7 1.7 0 0 0 1.03 1.57 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.8 1.8-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.57 1.03H21v2.55h-.49A1.7 1.7 0 0 0 19.4 15Z"/></svg></span> Settings</button>
   </nav>
   <div class="sidebar-foot">
     <p>Catat sekarang,<br>rekap otomatis nanti.</p>
@@ -502,6 +533,127 @@ select option{background:var(--paper);color:var(--ink)}
       </div>
     </div>
   </section>
+
+  <section id="settings" class="page">
+    <div class="card pad">
+      <div class="card-title">
+        <h2>Profile & Calorie Settings</h2>
+        <span class="tag">Personal Target</span>
+      </div>
+
+      <p class="muted" style="line-height:1.65;margin-top:0">
+        Masukkan data tubuh untuk mendapatkan estimasi kebutuhan kalori harian.
+        Target harian bisa langsung mengikuti rekomendasi atau diatur sendiri.
+      </p>
+
+      <div class="settings-grid">
+        <div>
+          <label for="weightInput">Berat badan (kg)</label>
+          <input id="weightInput" type="number" min="20" max="400" step="0.1" placeholder="Contoh: 86">
+        </div>
+        <div>
+          <label for="heightInput">Tinggi badan (cm)</label>
+          <input id="heightInput" type="number" min="100" max="250" step="0.1" placeholder="Contoh: 170">
+        </div>
+        <div>
+          <label for="ageInput">Usia (tahun)</label>
+          <input id="ageInput" type="number" min="13" max="100" step="1" placeholder="Contoh: 24">
+        </div>
+        <div>
+          <label for="sexInput">Jenis kelamin</label>
+          <select id="sexInput">
+            <option value="male">Pria</option>
+            <option value="female">Wanita</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="activityInput">Aktivitas harian</label>
+          <select id="activityInput">
+            <option value="1.2">Sedentary — banyak duduk, sedikit olahraga</option>
+            <option value="1.375">Light — olahraga ringan 1–3 hari/minggu</option>
+            <option value="1.55">Moderate — olahraga 3–5 hari/minggu</option>
+            <option value="1.725">Very active — olahraga berat 6–7 hari/minggu</option>
+            <option value="1.9">Extra active — aktivitas fisik sangat tinggi</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="goalInput">Tujuan</label>
+          <select id="goalInput">
+            <option value="lose">Turun berat badan</option>
+            <option value="maintain">Mempertahankan berat badan</option>
+            <option value="gain">Menaikkan berat badan</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-result">
+        <div style="font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-45)">
+          Rekomendasi asupan kalori harian
+        </div>
+        <div class="settings-number" id="recommendedKcal">— kcal</div>
+        <div class="settings-note" id="recommendationNote">
+          Lengkapi data di atas untuk menghitung estimasi.
+        </div>
+
+        <div class="recommendation">
+          <div class="macro">
+            <b id="bmrValue">—</b>
+            <span>BMR</span>
+          </div>
+          <div class="macro">
+            <b id="tdeeValue">—</b>
+            <span>TDEE</span>
+          </div>
+          <div class="macro">
+            <b id="bmiValue">—</b>
+            <span>BMI</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="card-title">
+          <h3>Target kalori harian</h3>
+          <span class="muted">Dipakai dashboard & analytics</span>
+        </div>
+
+        <div class="settings-grid">
+          <div class="full">
+            <label for="targetInput">Target (kcal/hari)</label>
+            <input id="targetInput" type="number" min="800" max="10000" step="50" placeholder="Contoh: 2200">
+            <div class="settings-note">
+              Rekomendasi hanya estimasi. Target dapat kamu sesuaikan berdasarkan tujuan dan kondisi pribadi.
+            </div>
+          </div>
+        </div>
+
+        <div class="target-options">
+          <button type="button" class="target-option" data-target-choice="recommended">Pakai rekomendasi</button>
+          <button type="button" class="target-option" data-target-choice="custom">Target custom</button>
+          <button type="button" class="target-option" data-target-choice="reset">Kembali ke 2200</button>
+        </div>
+      </div>
+
+      <div class="settings-actions">
+        <button class="add-btn" type="button" id="calculateSettings">Calculate recommendation</button>
+        <button class="add-btn" type="button" id="saveSettings">Save settings</button>
+      </div>
+    </div>
+
+    <div class="card pad" style="margin-top:20px">
+      <div class="card-title">
+        <h2>Current profile</h2>
+        <span class="tag">Saved locally</span>
+      </div>
+      <div class="profile-summary">
+        <div class="macro"><b id="summaryWeight">—</b><span>Weight</span></div>
+        <div class="macro"><b id="summaryHeight">—</b><span>Height</span></div>
+        <div class="macro"><b id="summaryRecommended">—</b><span>Recommended</span></div>
+        <div class="macro"><b id="summaryTarget">—</b><span>Daily target</span></div>
+      </div>
+    </div>
+  </section>
+
 </main>
 </div>
 
@@ -510,6 +662,7 @@ select option{background:var(--paper);color:var(--ink)}
   <button data-page="add"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/><path d="M12 8v8M8 12h8"/></svg></span>Add</button>
   <button data-page="analytics"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M11 20V4M18 20v-7"/><path d="M3 20h18"/></svg></span>Stats</button>
   <button data-page="history"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9l5 5v11H5z"/><path d="M8 11h8M8 14.5h8M8 18h5"/></svg></span>History</button>
+  <button data-page="settings"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.8 1.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.57V22h-2.55v-.09a1.7 1.7 0 0 0-1.03-1.57 1.7 1.7 0 0 0-1.88.34l-.06.06-1.8-1.8.06-.06A1.7 1.7 0 0 0 8.1 15a1.7 1.7 0 0 0-1.57-1.03H6.45v-2.55h.08A1.7 1.7 0 0 0 8.1 10.4a1.7 1.7 0 0 0-.34-1.88L7.7 8.46l1.8-1.8.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.57V5h2.55v.49a1.7 1.7 0 0 0 1.03 1.57 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.8 1.8-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.57 1.03H21v2.55h-.49A1.7 1.7 0 0 0 19.4 15Z"/></svg></span>Settings</button>
 </div>
 <div id="toast" class="toast"></div>
 
@@ -520,6 +673,140 @@ let entries=JSON.parse(localStorage.getItem(KEY)||"[]");
 let target=Number(localStorage.getItem(TARGET_KEY)||2200);
 let selectedDate=new Date().toISOString().slice(0,10);
 let currentMode="both";
+
+const PROFILE_KEY="dapurData_profile_v1";
+const DEFAULT_TARGET=2200;
+let profile=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");
+let recommendedKcal=Number(profile.recommendedKcal||0);
+
+function saveProfile(){
+  localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));
+}
+
+function calculateRecommendation(){
+  const weight=Number($("#weightInput").value);
+  const height=Number($("#heightInput").value);
+  const age=Number($("#ageInput").value);
+  const sex=$("#sexInput").value;
+  const activity=Number($("#activityInput").value);
+  const goal=$("#goalInput").value;
+
+  if(!(weight>0&&height>0&&age>0&&activity>0)){
+    toast("Lengkapi berat, tinggi, usia, dan aktivitas terlebih dahulu.");
+    return null;
+  }
+
+  // Mifflin-St Jeor BMR + activity multiplier.
+  const bmr=10*weight+6.25*height-5*age+(sex==="male"?5:-161);
+  const tdee=bmr*activity;
+  let recommendation=tdee;
+  let note="Target pemeliharaan berdasarkan estimasi TDEE.";
+
+  if(goal==="lose"){
+    recommendation=tdee-400;
+    note="Estimasi defisit moderat sekitar 400 kcal/hari untuk membantu penurunan berat badan.";
+  }else if(goal==="gain"){
+    recommendation=tdee+300;
+    note="Estimasi surplus moderat sekitar 300 kcal/hari untuk membantu kenaikan berat badan.";
+  }
+
+  // Keep the recommendation in a practical range.
+  recommendation=Math.max(1200,Math.round(recommendation/50)*50);
+  const bmi=weight/Math.pow(height/100,2);
+
+  recommendedKcal=recommendation;
+  $("#recommendedKcal").textContent=fmt(recommendation)+" kcal";
+  $("#bmrValue").textContent=fmt(bmr)+" kcal";
+  $("#tdeeValue").textContent=fmt(tdee)+" kcal";
+  $("#bmiValue").textContent=bmi.toFixed(1);
+  $("#recommendationNote").textContent=note;
+  return {weight,height,age,sex,activity,goal,bmr,tdee,bmi,recommendation};
+}
+
+function loadSettingsForm(){
+  $("#weightInput").value=profile.weight??"";
+  $("#heightInput").value=profile.height??"";
+  $("#ageInput").value=profile.age??"";
+  $("#sexInput").value=profile.sex||"male";
+  $("#activityInput").value=String(profile.activity||"1.2");
+  $("#goalInput").value=profile.goal||"lose";
+  $("#targetInput").value=target||DEFAULT_TARGET;
+
+  if(profile.recommendedKcal){
+    recommendedKcal=Number(profile.recommendedKcal);
+    $("#recommendedKcal").textContent=fmt(recommendedKcal)+" kcal";
+    $("#bmrValue").textContent=profile.bmr?fmt(profile.bmr)+" kcal":"—";
+    $("#tdeeValue").textContent=profile.tdee?fmt(profile.tdee)+" kcal":"—";
+    $("#bmiValue").textContent=profile.bmi?Number(profile.bmi).toFixed(1):"—";
+    $("#recommendationNote").textContent=profile.note||"Rekomendasi tersimpan.";
+  }else{
+    $("#recommendedKcal").textContent="— kcal";
+    $("#bmrValue").textContent="—";
+    $("#tdeeValue").textContent="—";
+    $("#bmiValue").textContent="—";
+  }
+}
+
+function renderSettings(){
+  loadSettingsForm();
+  $("#summaryWeight").textContent=profile.weight?`${profile.weight} kg`:"—";
+  $("#summaryHeight").textContent=profile.height?`${profile.height} cm`:"—";
+  $("#summaryRecommended").textContent=profile.recommendedKcal?`${fmt(profile.recommendedKcal)} kcal`:"—";
+  $("#summaryTarget").textContent=fmt(target)+" kcal";
+}
+
+function saveSettings(){
+  const calc=calculateRecommendation();
+  if(!calc)return;
+
+  const customTarget=Number($("#targetInput").value);
+  target=customTarget>=800?Math.round(customTarget):calc.recommendation;
+
+  profile={
+    weight:calc.weight,
+    height:calc.height,
+    age:calc.age,
+    sex:calc.sex,
+    activity:calc.activity,
+    goal:calc.goal,
+    bmr:calc.bmr,
+    tdee:calc.tdee,
+    bmi:calc.bmi,
+    recommendedKcal:calc.recommendation,
+    note:$("#recommendationNote").textContent,
+    updatedAt:new Date().toISOString()
+  };
+
+  localStorage.setItem(TARGET_KEY,String(target));
+  saveProfile();
+  renderDashboard();
+  renderAnalytics();
+  renderSettings();
+  toast("Pengaturan berhasil disimpan.");
+}
+
+$("#calculateSettings").addEventListener("click",calculateRecommendation);
+$("#saveSettings").addEventListener("click",saveSettings);
+
+$$("[data-target-choice]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const choice=btn.dataset.targetChoice;
+    if(choice==="recommended"){
+      if(!recommendedKcal){
+        const calc=calculateRecommendation();
+        if(!calc)return;
+      }
+      $("#targetInput").value=recommendedKcal;
+      toast("Target diisi dengan rekomendasi.");
+    }else if(choice==="reset"){
+      $("#targetInput").value=DEFAULT_TARGET;
+      toast("Target dikembalikan ke 2200 kcal.");
+    }else{
+      $("#targetInput").focus();
+    }
+  });
+});
+
 
 const $=s=>document.querySelector(s);
 const $$=s=>document.querySelectorAll(s);
@@ -563,10 +850,11 @@ $("#themeDark").addEventListener("click",e=>applyTheme("dark",e));
 function showPage(page){
   $$(".page").forEach(x=>x.classList.toggle("active",x.id===page));
   $$(".nav button,.mobile-nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));
-  const titles={dashboard:"Good evening 👋",add:"Analyze your food",analytics:"Your analytics",history:"Food history"};
+  const titles={dashboard:"Good evening 👋",add:"Analyze your food",analytics:"Your analytics",history:"Food history",settings:"Profile & Settings"};
   $("#pageTitle").textContent=titles[page]||"Calorie AI";
   if(page==="analytics")renderAnalytics();
   if(page==="history")renderHistory();
+  if(page==="settings")renderSettings();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 $$("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
@@ -753,7 +1041,7 @@ function renderHistory(){
 }
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
-renderDashboard();renderAnalytics();renderHistory();
+renderDashboard();renderAnalytics();renderHistory();renderSettings();
 
 /* ---- subtle receipt tilt on the hero card (purely decorative, respects reduced-motion) ---- */
 (function(){
