@@ -266,6 +266,48 @@ button{cursor:pointer}
   .target-options{grid-template-columns:1fr}
 }
 
+/* ---------- custom calorie target ---------- */
+.custom-target-box{
+  padding:15px;
+  border:1px dashed var(--line-strong);
+  background:var(--paper-2);
+}
+.custom-target-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.custom-target-row input{
+  flex:1;
+  min-width:0;
+}
+.custom-target-row span{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--ink-45);
+  white-space:nowrap;
+}
+.ai-profile-btn{
+  position:relative;
+}
+.ai-profile-btn.loading{
+  opacity:.65;
+  pointer-events:none;
+}
+.ai-profile-btn.loading::after{
+  content:"";
+  display:inline-block;
+  width:11px;height:11px;margin-left:7px;
+  border:1.5px solid var(--ink-45);
+  border-top-color:var(--ink);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@media(max-width:560px){
+  .custom-target-row{align-items:stretch;flex-direction:column}
+  .custom-target-row span{padding-top:2px}
+}
+
 /* ---------- stats / analytics ---------- */
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
 .stat{padding:19px;background:var(--paper);border:1.5px solid var(--ink);box-shadow:var(--shadow-paper);transition:transform .18s ease}
@@ -1071,12 +1113,21 @@ button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
             <small>Pilih berdasarkan gabungan aktivitas harian dan olahraga rutin, bukan hanya jumlah hari gym.</small>
           </div>
           <div class="settings-section">
-            <label>Target</label>
+            <label>Tujuan kalori</label>
             <div class="target-options">
               <button class="target-option active" type="button" data-goal="loss">Turun</button>
               <button class="target-option" type="button" data-goal="maintain">Maintain</button>
               <button class="target-option" type="button" data-goal="gain">Naik</button>
             </div>
+          </div>
+
+          <div class="settings-section custom-target-box">
+            <label for="customTarget">Atur target sendiri</label>
+            <div class="custom-target-row">
+              <input id="customTarget" type="number" min="1200" max="10000" step="50" placeholder="Contoh: 1.900">
+              <span>kcal / hari</span>
+            </div>
+            <div class="settings-note">Target manual akan dipakai sebagai target utama, meskipun rekomendasi kalkulator berbeda.</div>
           </div>
           <div class="settings-result">
             <div class="settings-grid">
@@ -1092,6 +1143,7 @@ button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
           </div>
           <div class="settings-actions">
             <button class="secondary-btn" type="button" id="calculateRecommendation">Hitung Rekomendasi</button>
+            <button class="secondary-btn ai-profile-btn" type="button" id="askAIRecommendation">✦ Rekomendasi AI</button>
             <button class="add-btn" type="submit">Simpan profil</button>
           </div>
         </form>
@@ -1336,7 +1388,10 @@ const PROFILE_KEY = "dapurData_profile_v2";
 const THEME_KEY = "dapurData_theme_v2";
 const WORKOUT_CHECK_KEY = "dapurData_workout_checklist_v1";
 
-const defaultProfile = {weight:86,height:170,age:24,activity:1.55,goal:"loss",target:2000};
+const defaultProfile = {
+  weight:86,height:170,age:24,activity:1.55,goal:"loss",
+  target:2000,customTarget:null,recommendedTarget:2000
+};
 let foods = JSON.parse(localStorage.getItem(FOOD_KEY) || "[]");
 let profile = {...defaultProfile, ...(JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"))};
 let selectedDate = new Date().toISOString().slice(0,10);
@@ -1444,31 +1499,57 @@ function updateActivityHelp(){
 $("#profileActivity").addEventListener("change",updateActivityHelp);
 updateActivityHelp();
 
-function calcProfile(){
-  const w=+$("#profileWeight").value||86,h=+$("#profileHeight").value||170,a=+$("#profileAge").value||24,act=+$("#profileActivity").value||1.55;
-  const bmr=10*w+6.25*h-5*a+5, tdee=bmr*act;
-  let target=tdee;
-  if(profile.goal==="loss") target=tdee-500;
-  if(profile.goal==="gain") target=tdee+250;
-  target=Math.round(target/50)*50;
-  profile.target=Math.max(1200,target);
+function calcProfile(options={saveRecommendation:true}){
+  const w=+$("#profileWeight").value||86;
+  const h=+$("#profileHeight").value||170;
+  const a=+$("#profileAge").value||24;
+  const act=+$("#profileActivity").value||1.55;
+
+  // Mifflin-St Jeor (versi saat ini memakai konstanta pria seperti kalkulator sebelumnya).
+  const bmr=10*w+6.25*h-5*a+5;
+  const tdee=bmr*act;
+
+  let recommended=tdee;
+  if(profile.goal==="loss") recommended=tdee-500;
+  if(profile.goal==="gain") recommended=tdee+250;
+  recommended=Math.max(1200,Math.round(recommended/50)*50);
+
+  profile.recommendedTarget=recommended;
+
+  const custom=+$("#customTarget").value;
+  const hasCustom=Number.isFinite(custom) && custom>=1200;
+  profile.customTarget=hasCustom ? Math.round(custom/50)*50 : null;
+  profile.target=profile.customTarget ?? recommended;
+
   $("#bmrValue").textContent=Math.round(bmr).toLocaleString("id-ID");
   $("#tdeeValue").textContent=Math.round(tdee).toLocaleString("id-ID");
-  $("#recommendedKcal").textContent=profile.target.toLocaleString("id-ID");
+  $("#recommendedKcal").textContent=recommended.toLocaleString("id-ID");
   $("#recommendedProtein").textContent=Math.round(w*1.8)+" g";
   $("#recommendedFat").textContent=Math.round(w*.7)+" g";
-  const goalText=profile.goal==="loss"?"defisit sekitar 500 kcal untuk membantu penurunan berat badan":
-                  profile.goal==="gain"?"surplus sekitar 250 kcal untuk mendukung kenaikan berat badan":
-                  "asupan sekitar TDEE untuk mempertahankan berat badan";
-  $("#recommendationNote").innerHTML=`Rekomendasi ini menggunakan BMR × faktor aktivitas. Untuk tujuan <strong>${profile.goal==="loss"?"Turun":profile.goal==="gain"?"Naik":"Maintain"}</strong>, aplikasi memakai ${goalText}.`;
+
+  const goalText=profile.goal==="loss"
+    ?"defisit sekitar 500 kcal untuk membantu penurunan berat badan"
+    :profile.goal==="gain"
+      ?"surplus sekitar 250 kcal untuk mendukung kenaikan berat badan"
+      :"asupan sekitar TDEE untuk mempertahankan berat badan";
+
+  $("#recommendationNote").innerHTML = hasCustom
+    ? `Rekomendasi kalkulator: <strong>${recommended.toLocaleString("id-ID")} kcal/hari</strong>. Target yang kamu pilih sendiri: <strong>${profile.target.toLocaleString("id-ID")} kcal/hari</strong> — target manual inilah yang digunakan Dashboard.`
+    : `Rekomendasi ini menggunakan BMR × faktor aktivitas. Untuk tujuan <strong>${profile.goal==="loss"?"Turun":profile.goal==="gain"?"Naik":"Maintain"}</strong>, aplikasi memakai ${goalText}. Kamu tetap bisa menentukan target sendiri di kolom <strong>Atur target sendiri</strong>.`;
+
+  if(options.saveRecommendation){
+    localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));
+  }
+  return {bmr,tdee,recommended,target:profile.target,customTarget:profile.customTarget};
 }
 function renderProfile(){
   $("#profileWeight").value=profile.weight;
   $("#profileHeight").value=profile.height;
   $("#profileAge").value=profile.age;
   $("#profileActivity").value=profile.activity;
+  $("#customTarget").value=profile.customTarget ?? "";
   $$(".target-option").forEach(b=>b.classList.toggle("active",b.dataset.goal===profile.goal));
-  calcProfile();
+  calcProfile({saveRecommendation:false});
 }
 function navigate(page){
   $$(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+page));
@@ -1599,19 +1680,103 @@ $("#darkTheme").onclick=(e)=>applyTheme("dark",e.currentTarget);
 $$(".target-option").forEach(b=>b.addEventListener("click",()=>{
   profile.goal=b.dataset.goal;
   $$(".target-option").forEach(x=>x.classList.toggle("active",x===b));
-  calcProfile();
+  calcProfile({saveRecommendation:false});
 }));
+
+$("#customTarget").addEventListener("input",()=>{
+  calcProfile({saveRecommendation:false});
+});
+
 $("#calculateRecommendation").onclick=()=>{
-  calcProfile();
-  toast("Rekomendasi kalori berhasil dihitung.");
+  // Hanya menghitung rekomendasi lokal; target manual tetap dipertahankan.
+  calcProfile({saveRecommendation:false});
+  toast("Rekomendasi berhasil dihitung.");
 };
+
+/*
+  AI PROFILE RECOMMENDATION
+  Endpoint ini sengaja dipanggil ke backend agar GEMINI_API_KEY tidak pernah
+  ditaruh di browser. Jika endpoint belum tersedia, kalkulator lokal tetap bekerja.
+*/
+$("#askAIRecommendation").onclick=async()=>{
+  const btn=$("#askAIRecommendation");
+  const payload={
+    weight:+$("#profileWeight").value||0,
+    height:+$("#profileHeight").value||0,
+    age:+$("#profileAge").value||0,
+    activity:+$("#profileActivity").value||1.55,
+    goal:profile.goal,
+    currentTarget:+$("#customTarget").value||null
+  };
+
+  if(!payload.weight||!payload.height||!payload.age){
+    toast("Lengkapi data profil terlebih dahulu.");
+    return;
+  }
+
+  btn.classList.add("loading");
+  btn.textContent="Menganalisis...";
+
+  try{
+    const response=await fetch("/api/profile-recommendation",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    });
+
+    if(!response.ok) throw new Error("AI endpoint tidak tersedia.");
+    const data=await response.json();
+
+    const recommendation=Number(data.targetKcal ?? data.recommendedKcal ?? data.target);
+    if(!Number.isFinite(recommendation)||recommendation<1200){
+      throw new Error("Respons AI tidak valid.");
+    }
+
+    const rounded=Math.round(recommendation/50)*50;
+    profile.recommendedTarget=rounded;
+    $("#recommendedKcal").textContent=rounded.toLocaleString("id-ID");
+    if(data.protein){
+      $("#recommendedProtein").textContent=Math.round(Number(data.protein))+" g";
+    }
+    if(data.fat){
+      $("#recommendedFat").textContent=Math.round(Number(data.fat))+" g";
+    }
+
+    // AI tidak mengambil alih target manual.
+    const manual=+$("#customTarget").value;
+    if(Number.isFinite(manual)&&manual>=1200){
+      profile.customTarget=Math.round(manual/50)*50;
+      profile.target=profile.customTarget;
+      $("#recommendationNote").innerHTML=
+        `AI merekomendasikan <strong>${rounded.toLocaleString("id-ID")} kcal/hari</strong>. Target manualmu <strong>${profile.target.toLocaleString("id-ID")} kcal/hari</strong> tetap dipakai oleh Dashboard.`;
+    }else{
+      profile.customTarget=null;
+      profile.target=rounded;
+      $("#recommendationNote").innerHTML=
+        `AI merekomendasikan <strong>${rounded.toLocaleString("id-ID")} kcal/hari</strong>. Kamu masih bebas menggantinya melalui <strong>Atur target sendiri</strong>.`;
+    }
+
+    localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));
+    renderDashboard();
+    renderStats();
+    toast("Rekomendasi AI berhasil.");
+  }catch(error){
+    console.warn(error);
+    calcProfile({saveRecommendation:false});
+    toast("AI belum terhubung. Rekomendasi kalkulator tetap tersedia.");
+  }finally{
+    btn.classList.remove("loading");
+    btn.textContent="✦ Rekomendasi AI";
+  }
+};
+
 $("#profileForm").addEventListener("submit",e=>{
   e.preventDefault();
   profile.weight=+$("#profileWeight").value||86;
   profile.height=+$("#profileHeight").value||170;
   profile.age=+$("#profileAge").value||24;
   profile.activity=+$("#profileActivity").value||1.55;
-  calcProfile();
+  calcProfile({saveRecommendation:false});
   localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));
   renderDashboard();renderStats();toast("Profil dan target disimpan.");
 });
