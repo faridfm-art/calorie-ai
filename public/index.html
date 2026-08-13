@@ -514,13 +514,6 @@ select option{background:var(--paper);color:var(--ink)}
 <div id="toast" class="toast"></div>
 
 <script>
-/* =========================================================
-   GOOGLE APPS SCRIPT CONFIG
-   Ganti URL ini dengan URL /exec Google Apps Script kamu
-   ========================================================= */
-const GOOGLE_APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwT49GBVsuFL_DAbdaaJOpFuda4P5tKtokdbwG3oMV0UQRUN7KrEv01Ym9pE7ci7SG3/exec";
-
 const KEY="calorieAI_entries_v1";
 const TARGET_KEY="calorieAI_target_v1";
 let entries=JSON.parse(localStorage.getItem(KEY)||"[]");
@@ -532,102 +525,6 @@ const $=s=>document.querySelector(s);
 const $$=s=>document.querySelectorAll(s);
 const save=()=>localStorage.setItem(KEY,JSON.stringify(entries));
 const fmt=n=>Math.round(n).toLocaleString("id-ID");
-
-/* =========================================================
-   HELPER GOOGLE APPS SCRIPT
-   ========================================================= */
-async function googleScriptRequest(action, payload = {}) {
-  if (
-    !GOOGLE_APPS_SCRIPT_URL ||
-    GOOGLE_APPS_SCRIPT_URL.includes("PASTE_YOUR_EXEC_URL_HERE")
-  ) {
-    throw new Error(
-      "URL Google Apps Script belum diisi. Ganti GOOGLE_APPS_SCRIPT_URL dengan URL /exec kamu."
-    );
-  }
-
-  const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    },
-    body: JSON.stringify({
-      action,
-      ...payload
-    })
-  });
-
-  const text = await response.text();
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    throw new Error(
-      "Google Apps Script mengembalikan response yang bukan JSON."
-    );
-  }
-
-  if (!data.success) {
-    throw new Error(data.error || "Google Apps Script request gagal.");
-  }
-
-  return data;
-}
-
-/* =========================================================
-   LOAD DATA DARI GOOGLE SHEETS
-   ========================================================= */
-async function loadEntriesFromGoogleSheets() {
-  try {
-    const data = await googleScriptRequest("getEntries");
-
-    if (Array.isArray(data.entries)) {
-      entries = data.entries;
-      localStorage.setItem(KEY, JSON.stringify(entries));
-    }
-
-    renderDashboard();
-    renderAnalytics();
-    renderHistory();
-
-    console.log("Google Sheets loaded:", entries.length, "entries");
-  } catch (error) {
-    console.warn("Google Sheets tidak dapat diakses:", error.message);
-    /* Kalau Google Sheets gagal, aplikasi tetap menggunakan localStorage. */
-    renderDashboard();
-    renderAnalytics();
-    renderHistory();
-  }
-}
-
-/* =========================================================
-   SIMPAN DATA KE GOOGLE SHEETS
-   ========================================================= */
-async function saveEntryToGoogleSheets(entry) {
-  try {
-    const data = await googleScriptRequest("addEntry", { entry });
-    console.log("Entry berhasil dikirim ke Google Sheets:", data);
-    return true;
-  } catch (error) {
-    console.error("Gagal menyimpan ke Google Sheets:", error);
-    toast("Data tersimpan lokal, tetapi gagal dikirim ke Google Sheets.");
-    return false;
-  }
-}
-
-/* =========================================================
-   HAPUS DATA DARI GOOGLE SHEETS
-   ========================================================= */
-async function deleteEntryFromGoogleSheets(id) {
-  try {
-    await googleScriptRequest("deleteEntry", { id });
-    console.log("Entry berhasil dihapus dari Google Sheets:", id);
-    return true;
-  } catch (error) {
-    console.error("Gagal menghapus dari Google Sheets:", error);
-    return false;
-  }
-}
 
 /* ---- pengaturan mode terang / gelap (key sendiri, tidak menyentuh data makanan) ---- */
 const THEME_KEY="dapurData_theme_v1";
@@ -736,14 +633,8 @@ function renderDashboard(){
     $("#dailyTip").textContent=p<target*.05? "Pertimbangkan menambah sumber protein pada makanan berikutnya.":"Usahakan setiap makan memiliki sumber protein dan porsi yang sesuai target.";
   }
 }
-async function removeEntry(index){
-  const day=getDayEntries();const id=day[index].id;
-  entries=entries.filter(e=>e.id!==id);
-  save();
-  // Hapus juga dari Google Sheets
-  await deleteEntryFromGoogleSheets(id);
-  renderDashboard();
-  toast("Makanan dihapus");
+function removeEntry(index){
+  const day=getDayEntries();const id=day[index].id;entries=entries.filter(e=>e.id!==id);save();renderDashboard();toast("Makanan dihapus");
 }
 async function analyzeFood(){
   const desc=$("#description").value.trim();
@@ -824,10 +715,8 @@ async function analyzeFood(){
       <div class="suggestion"><b>AI assessment</b><br>${esc(result.assessment)}<br><br><b>Suggestion</b><br>${esc(result.suggestion)}</div>
       <button class="add-btn" style="margin-top:15px" id="saveAI">＋ Save to ${selectedDate}</button>`;
 
-    $("#saveAI").onclick=async ()=>{
+    $("#saveAI").onclick=()=>{
       entries.push(result);save();
-      // Kirim data ke Google Sheets
-      await saveEntryToGoogleSheets(result);
       $("#aiResult").style.display="none";
       $("#description").value="";$("#manualKcal").value="";$("#foodPhoto").value="";
       $("#photoStatus").textContent="Belum ada foto dipilih.";
@@ -865,9 +754,6 @@ function renderHistory(){
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
 renderDashboard();renderAnalytics();renderHistory();
-
-// Ambil data terbaru dari Google Sheets
-loadEntriesFromGoogleSheets();
 
 /* ---- subtle receipt tilt on the hero card (purely decorative, respects reduced-motion) ---- */
 (function(){
