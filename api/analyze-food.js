@@ -1,10 +1,6 @@
 import multer from "multer";
 import { GoogleGenAI } from "@google/genai";
 
-/* =====================================================
-   CONFIG
-===================================================== */
-
 const MODEL =
   process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
@@ -12,17 +8,12 @@ const API_KEY =
   process.env.GEMINI_API_KEY;
 
 const MAX_IMAGE_BYTES = Number(
-  process.env.MAX_IMAGE_BYTES ||
-  12 * 1024 * 1024
+  process.env.MAX_IMAGE_BYTES || 12 * 1024 * 1024
 );
 
 const MAX_OUTPUT_TOKENS = Number(
   process.env.MAX_OUTPUT_TOKENS || 4096
 );
-
-/* =====================================================
-   API KEY CHECK
-===================================================== */
 
 if (!API_KEY) {
   throw new Error(
@@ -30,74 +21,50 @@ if (!API_KEY) {
   );
 }
 
-/* =====================================================
-   GEMINI CLIENT
-===================================================== */
-
 const ai = new GoogleGenAI({
   apiKey: API_KEY
 });
 
-/* =====================================================
-   MULTER
-===================================================== */
-
 const upload = multer({
   storage: multer.memoryStorage(),
-
   limits: {
     fileSize: MAX_IMAGE_BYTES
   }
 });
 
-/* =====================================================
-   GEMINI RESPONSE SCHEMA
-===================================================== */
-
 const schema = {
   type: "object",
-
   properties: {
     foods: {
       type: "array",
-
       items: {
         type: "object",
-
         properties: {
           name: {
             type: "string"
           },
-
           portion_g: {
             type: "number"
           },
-
           portion_ml: {
             type: "number"
           },
-
           calories: {
             type: "number"
           },
-
           protein_g: {
             type: "number"
           },
-
           carbs_g: {
             type: "number"
           },
-
           fat_g: {
             type: "number"
           },
-
           confidence: {
             type: "number"
           }
         },
-
         required: [
           "name",
           "portion_g",
@@ -113,25 +80,20 @@ const schema = {
 
     total: {
       type: "object",
-
       properties: {
         calories: {
           type: "number"
         },
-
         protein_g: {
           type: "number"
         },
-
         carbs_g: {
           type: "number"
         },
-
         fat_g: {
           type: "number"
         }
       },
-
       required: [
         "calories",
         "protein_g",
@@ -172,83 +134,18 @@ const schema = {
   ]
 };
 
-/* =====================================================
-   CLEAN JSON
-===================================================== */
-
-function cleanJsonText(text) {
-  if (!text) {
-    return "";
-  }
-
-  let cleaned = String(text).trim();
-
-  // Hapus markdown code fence
-  cleaned = cleaned.replace(
-    /^```json\s*/i,
-    ""
-  );
-
-  cleaned = cleaned.replace(
-    /^```\s*/i,
-    ""
-  );
-
-  cleaned = cleaned.replace(
-    /\s*```$/i,
-    ""
-  );
-
-  cleaned = cleaned.trim();
-
-  // Cari object JSON
-  const firstBrace =
-    cleaned.indexOf("{");
-
-  const lastBrace =
-    cleaned.lastIndexOf("}");
-
-  if (
-    firstBrace !== -1 &&
-    lastBrace !== -1 &&
-    lastBrace > firstBrace
-  ) {
-    cleaned =
-      cleaned.substring(
-        firstBrace,
-        lastBrace + 1
-      );
-  }
-
-  return cleaned.trim();
-}
-
-/* =====================================================
-   NORMALIZE DATA
-===================================================== */
-
 function normalizeData(data) {
-  if (
-    !data ||
-    typeof data !== "object"
-  ) {
-    throw new Error(
-      "Response Gemini bukan object JSON."
-    );
+  if (!data || typeof data !== "object") {
+    throw new Error("Response Gemini bukan object.");
   }
 
-  if (
-    !Array.isArray(data.foods)
-  ) {
+  if (!Array.isArray(data.foods)) {
     throw new Error(
       "Response Gemini tidak memiliki foods."
     );
   }
 
-  if (
-    !data.total ||
-    typeof data.total !== "object"
-  ) {
+  if (!data.total || typeof data.total !== "object") {
     throw new Error(
       "Response Gemini tidak memiliki total."
     );
@@ -256,37 +153,21 @@ function normalizeData(data) {
 
   return {
     foods: data.foods.map((food) => ({
-      name: String(
-        food?.name || "Makanan"
-      ),
+      name: String(food?.name || "Makanan"),
 
-      portion_g: Number(
-        food?.portion_g ?? 0
-      ),
+      portion_g: Number(food?.portion_g ?? 0),
 
-      portion_ml: Number(
-        food?.portion_ml ?? 0
-      ),
+      portion_ml: Number(food?.portion_ml ?? 0),
 
-      calories: Number(
-        food?.calories ?? 0
-      ),
+      calories: Number(food?.calories ?? 0),
 
-      protein_g: Number(
-        food?.protein_g ?? 0
-      ),
+      protein_g: Number(food?.protein_g ?? 0),
 
-      carbs_g: Number(
-        food?.carbs_g ?? 0
-      ),
+      carbs_g: Number(food?.carbs_g ?? 0),
 
-      fat_g: Number(
-        food?.fat_g ?? 0
-      ),
+      fat_g: Number(food?.fat_g ?? 0),
 
-      confidence: Number(
-        food?.confidence ?? 0
-      )
+      confidence: Number(food?.confidence ?? 0)
     })),
 
     total: {
@@ -331,108 +212,61 @@ function normalizeData(data) {
   };
 }
 
-/* =====================================================
-   ANALYZE FOOD
-===================================================== */
-
-async function analyzeFood(
-  req,
-  res
-) {
+async function processRequest(req, res) {
   try {
-
-    /* =================================================
-       INPUT
-    ================================================= */
-
     const description =
       String(
         req.body?.description || ""
       ).trim();
 
-    if (
-      !req.file &&
-      !description
-    ) {
+    console.log(
+      "[Calorie AI] Description:",
+      description
+    );
+
+    console.log(
+      "[Calorie AI] Photo:",
+      req.file
+        ? req.file.originalname
+        : "none"
+    );
+
+    if (!description && !req.file) {
       return res.status(400).json({
         error:
           "Kirim foto, deskripsi, atau keduanya."
       });
     }
 
-    console.log(
-      "======================================"
-    );
-
-    console.log(
-      "CALORIE AI - ANALYZE FOOD"
-    );
-
-    console.log(
-      "Model:",
-      MODEL
-    );
-
-    console.log(
-      "Description:",
-      description || "(tidak ada)"
-    );
-
-    console.log(
-      "Photo:",
-      req.file
-        ? `${req.file.originalname} (${req.file.size} bytes)`
-        : "tidak ada"
-    );
-
-    /* =================================================
-       PROMPT
-    ================================================= */
-
     const prompt = `
 Kamu adalah AI nutrition assistant untuk aplikasi pencatat kalori.
 
-Analisis makanan dan/atau minuman berdasarkan:
-1. foto pengguna jika tersedia
-2. deskripsi pengguna jika tersedia
+Analisis makanan dan minuman berdasarkan deskripsi dan foto jika tersedia.
 
-ATURAN UTAMA:
+ATURAN:
 
-- Identifikasi hanya makanan atau minuman yang terlihat pada foto atau disebutkan pengguna.
-- Jangan mengarang makanan yang tidak terlihat atau tidak disebutkan.
-- Kalori adalah estimasi.
-- Protein, karbohidrat, dan lemak adalah estimasi.
-- Jangan mengklaim berat makanan dari foto sebagai berat pasti.
-- Jika pengguna memberikan berat atau ukuran porsi secara eksplisit, prioritaskan informasi tersebut.
-- Jika berat tidak diberikan, lakukan estimasi yang wajar berdasarkan ukuran visual.
-- Untuk makanan gunakan portion_g.
-- Untuk minuman gunakan portion_ml.
-- Jika portion_g tidak relevan, isi 0.
-- Jika portion_ml tidak relevan, isi 0.
-- confidence harus bernilai 0 sampai 1.
-- score harus bernilai 0 sampai 10.
+- Identifikasi hanya makanan atau minuman yang terlihat atau disebutkan.
+- Jangan mengarang makanan.
+- Semua nilai nutrisi adalah estimasi.
+- Jika pengguna memberikan berat atau ukuran porsi, gunakan informasi tersebut.
+- Jika berat tidak diberikan, lakukan estimasi yang masuk akal.
+- Makanan menggunakan portion_g.
+- Minuman menggunakan portion_ml.
+- Jika tidak relevan, isi nilai tersebut dengan 0.
+- confidence antara 0 dan 1.
+- score antara 0 dan 10.
 - score adalah penilaian kualitas makanan secara umum.
 - Bukan diagnosis medis.
-- label harus singkat.
-- assessment harus singkat.
-- suggestion harus praktis.
-- Jika ada beberapa makanan/minuman, masukkan semuanya ke foods.
-- total harus merupakan jumlah seluruh foods.
 - Gunakan Bahasa Indonesia.
+- Jika ada beberapa makanan, masukkan semuanya ke foods.
+- total harus merupakan jumlah seluruh foods.
 - Jangan memberikan markdown.
-- Jangan memberikan penjelasan di luar JSON.
-
-PENTING:
-
-Kamu WAJIB mengembalikan JSON yang mengikuti schema yang diberikan.
+- Jangan memberikan teks di luar JSON.
 
 DESKRIPSI PENGGUNA:
+
 ${description || "(tidak ada deskripsi)"}
 `;
-
-    /* =================================================
-       GEMINI PARTS
-    ================================================= */
 
     const parts = [
       {
@@ -440,52 +274,32 @@ ${description || "(tidak ada deskripsi)"}
       }
     ];
 
-    /* =================================================
-       IMAGE
-    ================================================= */
-
     if (req.file) {
-
       console.log(
-        "Memasukkan foto langsung ke Gemini..."
+        "[Calorie AI] Image MIME:",
+        req.file.mimetype
       );
 
-      /*
-       * TIDAK menggunakan sharp.
-       * File dikirim langsung dalam bentuk base64.
-       */
+      console.log(
+        "[Calorie AI] Image size:",
+        req.file.size
+      );
 
       parts.push({
         inlineData: {
-          mimeType:
-            req.file.mimetype ||
-            "image/jpeg",
-
-          data:
-            req.file.buffer.toString(
-              "base64"
-            )
+          mimeType: req.file.mimetype,
+          data: req.file.buffer.toString("base64")
         }
       });
-
-      console.log(
-        "Foto siap dikirim:",
-        req.file.size,
-        "bytes"
-      );
     }
 
-    /* =================================================
-       GEMINI REQUEST
-    ================================================= */
-
     console.log(
-      "Mengirim request ke Gemini..."
+      "[Calorie AI] Calling Gemini:",
+      MODEL
     );
 
     const response =
       await ai.models.generateContent({
-
         model: MODEL,
 
         contents: [
@@ -507,16 +321,13 @@ ${description || "(tidak ada deskripsi)"}
         }
       });
 
-    /* =================================================
-       GET RESPONSE TEXT
-    ================================================= */
+    console.log(
+      "[Calorie AI] Gemini response received"
+    );
 
-    let raw =
-      response.text;
+    let raw = response.text;
 
-    if (
-      typeof raw === "function"
-    ) {
+    if (typeof raw === "function") {
       raw = raw();
     }
 
@@ -528,250 +339,120 @@ ${description || "(tidak ada deskripsi)"}
     }
 
     console.log(
-      "Gemini response diterima."
-    );
-
-    console.log(
-      "Raw response:",
+      "[Calorie AI] Raw response:",
       raw
     );
 
-    if (
-      !raw ||
-      typeof raw !== "string"
-    ) {
-
-      console.error(
-        "Gemini response object:"
-      );
-
-      try {
-        console.error(
-          JSON.stringify(
-            response,
-            null,
-            2
-          )
-        );
-      } catch {
-        console.error(
-          response
-        );
-      }
-
+    if (!raw || typeof raw !== "string") {
       throw new Error(
         "Gemini tidak mengembalikan JSON."
       );
     }
 
-    /* =================================================
-       CLEAN JSON
-    ================================================= */
+    let cleaned = raw.trim();
 
-    const cleaned =
-      cleanJsonText(raw);
-
-    console.log(
-      "Cleaned JSON:",
-      cleaned
-    );
-
-    if (!cleaned) {
-      throw new Error(
-        "Response Gemini kosong."
-      );
+    if (
+      cleaned.startsWith("```json")
+    ) {
+      cleaned = cleaned
+        .replace(/^```json/i, "")
+        .replace(/```$/i, "")
+        .trim();
     }
 
-    /* =================================================
-       PARSE JSON
-    ================================================= */
+    if (
+      cleaned.startsWith("```")
+    ) {
+      cleaned = cleaned
+        .replace(/^```/i, "")
+        .replace(/```$/i, "")
+        .trim();
+    }
 
-    let parsed;
+    let data;
 
     try {
+      data = JSON.parse(cleaned);
+    } catch {
+      const first =
+        cleaned.indexOf("{");
 
-      parsed =
-        JSON.parse(cleaned);
+      const last =
+        cleaned.lastIndexOf("}");
 
-    } catch (parseError) {
+      if (
+        first === -1 ||
+        last === -1 ||
+        last <= first
+      ) {
+        throw new Error(
+          "Gemini mengembalikan response yang bukan JSON."
+        );
+      }
 
-      console.error(
-        "======================================"
-      );
+      const extracted =
+        cleaned.substring(
+          first,
+          last + 1
+        );
 
-      console.error(
-        "JSON PARSE ERROR"
-      );
-
-      console.error(
-        parseError.message
-      );
-
-      console.error(
-        "RAW RESPONSE:"
-      );
-
-      console.error(
-        raw
-      );
-
-      console.error(
-        "CLEANED RESPONSE:"
-      );
-
-      console.error(
-        cleaned
-      );
-
-      console.error(
-        "======================================"
-      );
-
-      throw new Error(
-        "JSON Gemini tidak valid: " +
-        parseError.message
-      );
+      data = JSON.parse(extracted);
     }
 
-    /* =================================================
-       NORMALIZE
-    ================================================= */
-
-    const data =
-      normalizeData(parsed);
-
-    /* =================================================
-       SUCCESS
-    ================================================= */
+    const normalized =
+      normalizeData(data);
 
     console.log(
-      "======================================"
-    );
-
-    console.log(
-      "ANALISIS BERHASIL"
-    );
-
-    console.log(
-      "Foods:",
-      data.foods.length
-    );
-
-    console.log(
-      "Calories:",
-      data.total.calories
-    );
-
-    console.log(
-      "Protein:",
-      data.total.protein_g
-    );
-
-    console.log(
-      "Carbs:",
-      data.total.carbs_g
-    );
-
-    console.log(
-      "Fat:",
-      data.total.fat_g
-    );
-
-    console.log(
-      "======================================"
+      "[Calorie AI] SUCCESS:",
+      normalized.total.calories,
+      "kcal"
     );
 
     return res.status(200).json(
-      data
+      normalized
     );
 
-  } catch (err) {
-
+  } catch (error) {
     console.error(
-      "======================================"
+      "[Calorie AI] ERROR:"
     );
 
-    console.error(
-      "ERROR ANALISIS GEMINI"
-    );
-
-    console.error(
-      err
-    );
-
-    console.error(
-      "======================================"
-    );
+    console.error(error);
 
     const message =
       String(
-        err?.message || ""
+        error?.message || error || ""
       );
-
-    /* =================================================
-       API KEY
-    ================================================= */
 
     if (
       /API[_ ]?key|401|UNAUTHENTICATED|PERMISSION_DENIED|API_KEY_INVALID/i
         .test(message)
     ) {
-
       return res.status(500).json({
         error:
           "Gemini API key tidak valid atau tidak punya akses."
       });
     }
 
-    /* =================================================
-       MODEL
-    ================================================= */
-
     if (
       /404|NOT_FOUND|model.*not.*available|model.*not.*found/i
         .test(message)
     ) {
-
       return res.status(500).json({
         error:
           `Model "${MODEL}" tidak tersedia untuk API key ini.`
       });
     }
 
-    /* =================================================
-       QUOTA
-    ================================================= */
-
     if (
       /429|RESOURCE_EXHAUSTED|quota|rate.?limit/i
         .test(message)
     ) {
-
       return res.status(429).json({
         error:
           "Quota Gemini tercapai. Periksa quota atau billing Google AI Studio."
       });
     }
-
-    /* =================================================
-       FILE SIZE
-    ================================================= */
-
-    if (
-      /LIMIT_FILE_SIZE/i.test(
-        message
-      )
-    ) {
-
-      return res.status(413).json({
-        error:
-          "Foto terlalu besar. Maksimum 12 MB."
-      });
-    }
-
-    /* =================================================
-       OTHER ERROR
-    ================================================= */
 
     return res.status(500).json({
       error:
@@ -781,54 +462,32 @@ ${description || "(tidak ada deskripsi)"}
   }
 }
 
-/* =====================================================
-   VERCEL HANDLER
-===================================================== */
-
-export default async function handler(
-  req,
-  res
-) {
-
-  /* =================================================
-     METHOD
-  ================================================= */
-
-  if (
-    req.method !== "POST"
-  ) {
-
+export default function handler(req, res) {
+  if (req.method !== "POST") {
     return res.status(405).json({
       error:
         "Method tidak diizinkan. Gunakan POST."
     });
   }
 
-  /* =================================================
-     MULTER
-  ================================================= */
-
   upload.single("photo")(
     req,
     res,
-    async (err) => {
+    (error) => {
 
-      if (err) {
-
+      if (error) {
         console.error(
-          "UPLOAD ERROR:",
-          err
+          "[Calorie AI] Upload error:",
+          error
         );
 
         if (
-          err instanceof multer.MulterError
+          error instanceof multer.MulterError
         ) {
-
           if (
-            err.code ===
+            error.code ===
             "LIMIT_FILE_SIZE"
           ) {
-
             return res.status(413).json({
               error:
                 "Foto terlalu besar. Maksimum 12 MB."
@@ -837,7 +496,7 @@ export default async function handler(
 
           return res.status(400).json({
             error:
-              err.message
+              error.message
           });
         }
 
@@ -847,28 +506,10 @@ export default async function handler(
         });
       }
 
-      try {
-
-        await analyzeFood(
-          req,
-          res
-        );
-
-      } catch (error) {
-
-        console.error(
-          "UNHANDLED HANDLER ERROR:",
-          error
-        );
-
-        if (!res.headersSent) {
-          return res.status(500).json({
-            error:
-              error?.message ||
-              "Terjadi kesalahan pada server."
-          });
-        }
-      }
+      return processRequest(
+        req,
+        res
+      );
     }
   );
 }
