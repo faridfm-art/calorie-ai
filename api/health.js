@@ -3,7 +3,6 @@ export default function handler(req, res) {
     ok: true,
     service: "calorie-ai-backend",
     provider: "Google Gemini",
-    model: process.env.GEMINI_MODEL || "tidak ada",
-    hasGeminiKey: !!process.env.GEMINI_API_KEY
+    model: process.env.GEMINI_MODEL || "tidak ada"
   });
 }
