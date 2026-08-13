@@ -1,0 +1,9 @@
+export default function handler(req, res) {
+  return res.status(200).json({
+    ok: true,
+    service: "calorie-ai-backend",
+    provider: "Google Gemini",
+    model:
+      process.env.GEMINI_MODEL || "gemini-3.5-flash"
+  });
+}
