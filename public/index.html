@@ -674,6 +674,12 @@ let target=Number(localStorage.getItem(TARGET_KEY)||2200);
 let selectedDate=new Date().toISOString().slice(0,10);
 let currentMode="both";
 
+/* DOM helpers must be initialized before Settings code uses them. */
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+const save=()=>localStorage.setItem(KEY,JSON.stringify(entries));
+const fmt=n=>Math.round(n).toLocaleString("id-ID");
+
 const PROFILE_KEY="dapurData_profile_v1";
 const DEFAULT_TARGET=2200;
 let profile=JSON.parse(localStorage.getItem(PROFILE_KEY)||"{}");
@@ -808,11 +814,6 @@ $$("[data-target-choice]").forEach(btn=>{
 });
 
 
-const $=s=>document.querySelector(s);
-const $$=s=>document.querySelectorAll(s);
-const save=()=>localStorage.setItem(KEY,JSON.stringify(entries));
-const fmt=n=>Math.round(n).toLocaleString("id-ID");
-
 /* ---- pengaturan mode terang / gelap (key sendiri, tidak menyentuh data makanan) ---- */
 const THEME_KEY="dapurData_theme_v1";
 function setThemeState(mode){
@@ -922,8 +923,15 @@ function renderDashboard(){
   }
 }
 function removeEntry(index){
-  const day=getDayEntries();const id=day[index].id;entries=entries.filter(e=>e.id!==id);save();renderDashboard();toast("Makanan dihapus");
+  const day=getDayEntries();
+  if(!day[index]) return;
+  const id=day[index].id;
+  entries=entries.filter(e=>e.id!==id);
+  save();
+  renderDashboard();
+  toast("Makanan dihapus");
 }
+window.removeEntry=removeEntry;
 async function analyzeFood(){
   const desc=$("#description").value.trim();
   const photo=$("#foodPhoto").files[0];
