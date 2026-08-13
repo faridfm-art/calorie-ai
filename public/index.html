@@ -1607,7 +1607,7 @@ function updateWorkoutProgress(){
 
 $$("[data-page]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.page)));
 $("#quickAdd").onclick=()=>navigate("add");
-$("#cancelFood").onclick=()=>navigate("dashboard");
+if($("#cancelFood")) $("#cancelFood").onclick=()=>navigate("dashboard");
 
 /* ---------- FOOD PHOTO / AI ANALYZER ---------- */
 let selectedFoodImage=null, selectedFoodImageData="", currentFoodMode="both";
