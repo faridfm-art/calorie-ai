@@ -1009,60 +1009,38 @@ button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
       </div>
     </section>
 
-    <!-- ADD FOOD -->
+    <!-- ADD FOOD / AI ANALYZER -->
     <section class="page" id="page-add">
       <div class="card pad">
-        <div class="card-title"><h2>Tambah makanan</h2><span class="tag">Manual</span></div>
-        <form id="foodForm">
-          <div class="upload" id="foodPhotoUpload">
-            <div class="drop-ic" aria-hidden="true">📷</div>
-            <p>Foto makanan</p>
-            <span>Pilih foto dari galeri atau ambil foto langsung dengan kamera.</span>
+        <div class="card-title"><h2>Analyze your food</h2><span class="tag">AI Food Scanner</span></div>
+        <div class="mode">
+          <button class="active" data-mode="both" type="button">📷 ✎ Both</button>
+          <button data-mode="photo" type="button">📷 Photo</button>
+          <button data-mode="text" type="button">✎ Description</button>
+        </div>
+        <div class="form-grid">
+          <div id="photoField" class="full upload">
+            <span class="drop-ic"><span style="font-size:30px">📷</span></span>
+            <p>Upload food or drink photo</p>
+            <p class="muted" style="font-size:13px">Gunakan foto yang jelas dan dari atas bila memungkinkan.</p>
             <div class="photo-actions">
-              <button class="add-btn" type="button" id="takeFoodPhoto">📷 Ambil Foto</button>
-              <button class="secondary-btn" type="button" id="chooseFoodPhoto">🖼️ Dari Galeri</button>
+              <button type="button" class="add-btn" id="takeFoodPhoto">📷 Ambil Foto</button>
+              <button type="button" class="secondary-btn" id="chooseFoodPhoto">🖼️ Dari Galeri</button>
             </div>
-            <input id="foodCamera" type="file" accept="image/*" capture="environment">
-            <input id="foodGallery" type="file" accept="image/*">
+            <input id="foodCamera" type="file" accept="image/*" capture="environment" style="display:none">
+            <input id="foodGallery" type="file" accept="image/*" style="display:none">
+            <div id="foodPhotoMeta" class="muted" style="font-size:12px;margin-top:12px">Belum ada foto dipilih.</div>
             <img id="foodPhotoPreview" class="preview" alt="Preview foto makanan">
-            <div class="photo-meta" id="foodPhotoMeta"></div>
           </div>
-
-          <div class="form-grid">
-            <div>
-              <label for="foodName">Nama makanan</label>
-              <input id="foodName" type="text" placeholder="Contoh: Nasi + ayam" required>
-            </div>
-            <div>
-              <label for="foodKcal">Kalori (kcal)</label>
-              <input id="foodKcal" type="number" min="0" step="1" placeholder="500" required>
-            </div>
-            <div>
-              <label for="foodProtein">Protein (g)</label>
-              <input id="foodProtein" type="number" min="0" step="0.1" placeholder="25">
-            </div>
-            <div>
-              <label for="foodCarb">Karbohidrat (g)</label>
-              <input id="foodCarb" type="number" min="0" step="0.1" placeholder="50">
-            </div>
-            <div>
-              <label for="foodFat">Lemak (g)</label>
-              <input id="foodFat" type="number" min="0" step="0.1" placeholder="15">
-            </div>
-            <div>
-              <label for="foodTime">Waktu</label>
-              <input id="foodTime" type="time">
-            </div>
-            <div class="full">
-              <label for="foodNote">Catatan</label>
-              <textarea id="foodNote" placeholder="Porsi, bahan, atau catatan lainnya..."></textarea>
-            </div>
+          <div id="textField" class="full">
+            <label for="description">Food description</label>
+            <textarea id="description" placeholder="Contoh: nasi putih 150g, ayam goreng paha 1 potong, telur ceplok 1, teh manis 250ml"></textarea>
           </div>
-          <div class="settings-actions">
-            <button class="secondary-btn" type="button" id="cancelFood">Batal</button>
-            <button class="add-btn" type="submit">Simpan makanan</button>
-          </div>
-        </form>
+          <div><label for="mealType">Meal</label><select id="mealType"><option>Breakfast</option><option>Lunch</option><option>Snack</option><option>Dinner</option><option>Drink</option></select></div>
+          <div><label for="manualKcal">Kalori manual (opsional)</label><input id="manualKcal" type="number" min="0" step="1" placeholder="Kosongkan untuk memakai estimasi Gemini"></div>
+          <div class="full" style="display:flex;gap:10px;justify-content:flex-end"><button class="add-btn" type="button" id="analyzeFoodBtn">Analyze with AI</button></div>
+        </div>
+        <div id="aiResult" class="ai-result"></div>
       </div>
     </section>
 
@@ -1631,53 +1609,14 @@ $$("[data-page]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.p
 $("#quickAdd").onclick=()=>navigate("add");
 $("#cancelFood").onclick=()=>navigate("dashboard");
 
-/* ---------- FOOD PHOTO / AI READY ---------- */
-let selectedFoodImage = null;
-let selectedFoodImageData = "";
-
-function handleFoodImage(file){
-  if(!file) return;
-  if(!file.type.startsWith("image/")){ toast("File harus berupa gambar."); return; }
-  if(file.size>8*1024*1024){ toast("Ukuran foto maksimal 8 MB."); return; }
-  selectedFoodImage=file;
-  const reader=new FileReader();
-  reader.onload=()=>{
-    selectedFoodImageData=reader.result;
-    const preview=$("#foodPhotoPreview");
-    preview.src=selectedFoodImageData;
-    preview.style.display="block";
-    $("#foodPhotoMeta").textContent=`${file.name} · ${(file.size/1024/1024).toFixed(2)} MB`;
-    $("#foodPhotoUpload").classList.add("has-photo");
-  };
-  reader.readAsDataURL(file);
-}
-
-$("#takeFoodPhoto").onclick=()=>$("#foodCamera").click();
-$("#chooseFoodPhoto").onclick=()=>$("#foodGallery").click();
-$("#foodCamera").addEventListener("change",e=>handleFoodImage(e.target.files?.[0]));
-$("#foodGallery").addEventListener("change",e=>handleFoodImage(e.target.files?.[0]));
-
-function resetFoodPhoto(){
-  selectedFoodImage=null; selectedFoodImageData="";
-  $("#foodCamera").value=""; $("#foodGallery").value="";
-  $("#foodPhotoPreview").src=""; $("#foodPhotoPreview").style.display="none";
-  $("#foodPhotoMeta").textContent=""; $("#foodPhotoUpload").classList.remove("has-photo");
-}
-
-/* AI hook: selectedFoodImage siap dikirim ke backend via FormData.
-   Contoh: formData.append("image", selectedFoodImage);
-   Jangan taruh API key Gemini/OpenAI di browser. */
-
-$("#foodForm").addEventListener("submit",e=>{
-  e.preventDefault();
-  foods.push({
-    id:Date.now().toString(),date:selectedDate,
-    name:$("#foodName").value.trim(),kcal:+$("#foodKcal").value||0,
-    protein:+$("#foodProtein").value||0,carb:+$("#foodCarb").value||0,fat:+$("#foodFat").value||0,
-    time:$("#foodTime").value,note:$("#foodNote").value.trim(),image:selectedFoodImageData||""
-  });
-  saveFoods(); e.target.reset(); resetFoodPhoto(); renderDashboard(); renderHistory(); toast("Makanan disimpan."); navigate("dashboard");
-});
+/* ---------- FOOD PHOTO / AI ANALYZER ---------- */
+let selectedFoodImage=null, selectedFoodImageData="", currentFoodMode="both";
+function handleFoodImage(file){if(!file)return;if(!file.type.startsWith("image/")){toast("File harus berupa gambar.");return}if(file.size>12*1024*1024){toast("Ukuran foto maksimal 12 MB.");return}selectedFoodImage=file;const r=new FileReader();r.onload=()=>{$("#foodPhotoPreview").src=r.result;$("#foodPhotoPreview").style.display="block";selectedFoodImageData=r.result;$("#foodPhotoMeta").textContent=`Foto dipilih: ${file.name} · ${(file.size/1024/1024).toFixed(2)} MB`};r.readAsDataURL(file)}
+$("#takeFoodPhoto").onclick=()=>$("#foodCamera").click();$("#chooseFoodPhoto").onclick=()=>$("#foodGallery").click();$("#foodCamera").addEventListener("change",e=>handleFoodImage(e.target.files?.[0]));$("#foodGallery").addEventListener("change",e=>handleFoodImage(e.target.files?.[0]));
+$$(".mode button").forEach(b=>b.addEventListener("click",()=>{currentFoodMode=b.dataset.mode;$$('.mode button').forEach(x=>x.classList.toggle('active',x===b));$("#photoField").style.display=currentFoodMode==="text"?"none":"block";$("#textField").style.display=currentFoodMode==="photo"?"none":"block"}));
+function resetFoodAnalyzer(){$("#foodCamera").value="";$("#foodGallery").value="";selectedFoodImage=null;selectedFoodImageData="";$("#foodPhotoPreview").src="";$("#foodPhotoPreview").style.display="none";$("#foodPhotoMeta").textContent="Belum ada foto dipilih.";$("#description").value="";$("#manualKcal").value="";$("#aiResult").style.display="none";$("#aiResult").innerHTML=""}
+async function analyzeFood(){const desc=$("#description").value.trim(),photo=selectedFoodImage,manual=Number($("#manualKcal").value)||0;if(currentFoodMode==="photo"&&!photo)return toast("Ambil foto atau pilih foto dari galeri terlebih dahulu.");if(currentFoodMode==="text"&&!desc)return toast("Tulis deskripsi makanan terlebih dahulu.");if(currentFoodMode==="both"&&!photo&&!desc)return toast("Masukkan foto atau deskripsi makanan.");const form=new FormData();if(desc)form.append("description",desc);if(photo)form.append("photo",photo);form.append("meal",$("#mealType").value);const btn=$("#analyzeFoodBtn"),box=$("#aiResult");btn.disabled=true;btn.innerHTML="Menganalisis dengan Gemini…";box.style.display="block";box.innerHTML='<div class="ai-loading"><span class="ai-spinner"></span><div><b>Menganalisis dengan Gemini…</b><div class="muted" style="font-size:12px;margin-top:3px">Foto dan/atau deskripsi sedang dianalisis.</div></div></div>';try{const response=await fetch("/api/analyze-food",{method:"POST",body:form});let data;try{data=await response.json()}catch{throw new Error("Backend mengembalikan respons yang tidak valid.")}if(!response.ok)throw new Error(data?.error||`Analisis gagal (${response.status}).`);const detected=Array.isArray(data.foods)?data.foods:[],total=data.total||{},score=Math.max(0,Math.min(10,Number(data.score)||0)),confidence=Math.max(0,Math.min(1,Number(data.confidence)||0)),level=score>=8?"good":score>=6?"mid":"bad",label=data.label||"Cukup";const portion=f=>f.portion_g!=null?`${Math.round(f.portion_g)} g`:f.portion_ml!=null?`${Math.round(f.portion_ml)} ml`:"Porsi tidak diketahui";const foodsHtml=detected.length?`<div class="ai-food-list">${detected.map(f=>`<div class="ai-food"><div><b>${escapeHtml(f.name)}</b><small>${portion(f)} · Confidence ${Math.round((Number(f.confidence)||0)*100)}%</small></div><strong>${Math.round(Number(f.calories)||0)} kcal</strong></div>`).join("")}</div>`:'<div class="muted" style="margin-top:12px">Gemini tidak menemukan item makanan yang dapat diidentifikasi.</div>';const result={id:Date.now().toString(),date:selectedDate,name:detected.length===1?detected[0].name:(detected.length?"Mixed meal":"Food analysis"),kcal:manual>0?manual:Number(total.calories)||0,protein:Number(total.protein_g)||0,carb:Number(total.carbs_g)||0,fat:Number(total.fat_g)||0,time:new Date().toTimeString().slice(0,5),note:data.assessment||"",image:selectedFoodImageData||"",source:photo&&desc?"photo+description":photo?"photo":"description",score:Math.round(score*10)/10,confidence};box.innerHTML=`<div class="result-head"><div><div class="muted">Gemini AI estimate</div><div style="font-size:25px;font-weight:850;margin-top:4px">${escapeHtml(result.name)}</div><div class="muted" style="font-size:12px;margin-top:5px">Confidence keseluruhan: ${Math.round(confidence*100)}%</div></div><div class="score">${score.toFixed(score%1?1:0)}/10 <span class="badge ${level}">${escapeHtml(label)}</span></div></div>${foodsHtml}<div class="macro-grid" style="margin-top:18px"><div class="macro"><b>${Math.round(result.kcal)}</b><span>Calories${manual>0?" (manual)":""}</span></div><div class="macro"><b>${Math.round(result.protein)}g</b><span>Protein</span></div><div class="macro"><b>${Math.round(result.carb)}g</b><span>Carbs</span></div></div><div class="macro-grid" style="margin-top:12px"><div class="macro"><b>${Math.round(result.fat)}g</b><span>Fat</span></div><div class="macro"><b>${detected.length}</b><span>Items detected</span></div><div class="macro"><b>${escapeHtml(result.source)}</b><span>Input</span></div></div><div class="suggestion"><b>AI assessment</b><br>${escapeHtml(data.assessment||"")}<br><br><b>Suggestion</b><br>${escapeHtml(data.suggestion||"")}</div><button class="add-btn" style="margin-top:15px" id="saveAI" type="button">＋ Save to ${selectedDate}</button>`;$("#saveAI").onclick=()=>{foods.push(result);saveFoods();resetFoodAnalyzer();renderDashboard();renderHistory();renderStats();toast("Hasil Gemini berhasil disimpan");navigate("dashboard")}}catch(err){console.error(err);box.innerHTML=`<div class="ai-error"><b>Analisis Gemini gagal</b><br>${escapeHtml(err?.message||"Terjadi kesalahan saat menghubungi backend.")}</div>`}finally{btn.disabled=false;btn.innerHTML="Analyze with AI"}}
+$("#analyzeFoodBtn").addEventListener("click",analyzeFood);
 
 document.addEventListener("click",e=>{
   const btn=e.target.closest("[data-remove]");
