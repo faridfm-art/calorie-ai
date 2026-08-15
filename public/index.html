@@ -130,21 +130,32 @@ button{cursor:pointer}
 .logo-mark span{font-family:var(--stamp);font-size:12px;letter-spacing:1px}
 .logo-text{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:-.3px;line-height:1.05;color:var(--on-dark-ink)}
 .logo-text small{display:block;font-family:var(--mono);font-weight:600;font-size:9px;letter-spacing:2px;color:var(--on-dark-ink-45);text-transform:uppercase;margin-top:4px}
-.nav{display:grid;gap:4px}
+.nav{display:grid;gap:4px;position:relative}
 .nav-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2.4px;color:var(--on-dark-ink-45);text-transform:uppercase;padding:8px 14px 6px}
 .nav button{
   position:relative;border:0;background:transparent;text-align:left;padding:11px 14px;border-radius:0;
   color:rgba(242,239,230,.62);font-weight:600;font-size:14px;display:flex;align-items:center;gap:12px;
-  transition:color .18s ease, transform .18s ease;letter-spacing:.2px;
+  transition:color .18s ease, transform .18s ease;letter-spacing:.2px;z-index:2;
 }
 .nav button .ic{width:17px;height:17px;flex:none;display:grid;place-items:center;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
 .nav button .ic svg{width:16px;height:16px;stroke:currentColor}
 .nav button::before{content:"";position:absolute;left:0;top:16%;bottom:16%;width:2px;
   background:var(--on-dark-ink);transform:scaleY(0);transform-origin:center;transition:transform .25s ease}
 .nav button:hover{color:var(--on-dark-ink);transform:translateX(3px)}
-.nav button.active{color:var(--on-dark-ink);background:rgba(242,239,230,.06)}
+.nav button.active{color:var(--on-dark-ink)}
 .nav button.active::before{transform:scaleY(1)}
 .nav button.active .ic{transform:scale(1.12) rotate(-3deg)}
+.nav-pill{
+  position:absolute;left:0;right:0;height:0;top:0;
+  background:rgba(242,239,230,.07);
+  border-left:2px solid transparent;
+  z-index:1;pointer-events:none;opacity:0;
+  transition:
+    transform .42s cubic-bezier(.22,1,.36,1),
+    height .42s cubic-bezier(.22,1,.36,1),
+    opacity .2s ease;
+}
+.nav-pill.ready{opacity:1}
 .sidebar-foot{margin-top:auto;padding:16px 14px 4px;border-top:1px dashed var(--on-dark-line)}
 .sidebar-foot p{font-family:var(--stamp);font-size:11px;color:var(--on-dark-ink-45);line-height:1.7;margin:0;letter-spacing:.2px}
 
@@ -210,7 +221,7 @@ button{cursor:pointer}
 .progress i{
   display:block;height:100%;width:0;position:relative;overflow:hidden;
   background:repeating-linear-gradient(115deg,var(--ink) 0 8px,var(--ink-70) 8px 16px);
-  transition:width .7s cubic-bezier(.16,1,.3,1);
+  transition:width .8s cubic-bezier(.22,1,.36,1);
 }
 .macro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .macro{padding:13px 10px;border:1px solid var(--ink);text-align:center;position:relative;transition:transform .18s ease}
@@ -355,6 +366,7 @@ select option{background:var(--paper);color:var(--ink)}
 .upload::before{top:8px;left:8px;border-right:0;border-bottom:0}
 .upload::after{bottom:8px;right:8px;border-left:0;border-top:0}
 .upload:hover{border-color:var(--ink);background:var(--paper-2)}
+.upload.drag-over{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.01)}
 .upload .drop-ic{display:inline-flex;margin-bottom:8px;color:var(--ink);animation:floatY 3s ease-in-out infinite}
 .upload .drop-ic svg{width:30px;height:30px}
 .upload p{margin:0 0 4px;font-weight:700;font-family:var(--display);font-size:16px}
@@ -1087,6 +1099,44 @@ button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
   .ink-ripple{display:none}
 }
 
+
+/* ---------- workout: date nav + day status ---------- */
+.workout-datebar{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  margin-bottom:18px;padding-bottom:16px;border-bottom:1px dashed var(--line-strong);
+}
+.workout-date-label{font-family:var(--stamp);font-size:12px;color:var(--ink-70);text-transform:uppercase;margin:0 0 4px}
+.workout-date-heading{font-family:var(--display);font-weight:600;font-size:20px;margin:0}
+.workout-status-row{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;
+}
+.workout-status-badge{
+  font-family:var(--stamp);font-size:11px;letter-spacing:1px;text-transform:uppercase;
+  padding:6px 12px;border-radius:2px;transform:rotate(-2deg);
+}
+.workout-status-toggle{
+  display:flex;border:1.5px solid var(--ink);overflow:hidden;
+}
+.workout-status-toggle button{
+  border:0;background:var(--paper);color:var(--ink-70);padding:9px 14px;font-weight:700;font-size:12.5px;
+  border-right:1px solid var(--ink);transition:.15s;
+}
+.workout-status-toggle button:last-child{border-right:0}
+.workout-status-toggle button.active{background:var(--ink);color:var(--paper)}
+.workout-split-select{max-width:220px}
+.workout-rest-card{
+  padding:26px;border:1.5px dashed var(--line-strong);text-align:center;
+}
+.workout-rest-card b{display:block;font-family:var(--display);font-size:18px;margin-bottom:6px}
+.workout-rest-card p{margin:0 0 16px;color:var(--ink-70);font-size:13px}
+@media(max-width:560px){
+  .workout-datebar{flex-direction:column;align-items:flex-start}
+  .workout-status-row{flex-direction:column;align-items:flex-start}
+  .workout-status-toggle{width:100%}
+  .workout-status-toggle button{flex:1}
+  .workout-split-select{max-width:none;width:100%}
+}
+
 </style>
 
 <body>
@@ -1100,6 +1150,7 @@ button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
     </div>
 
     <nav class="nav">
+      <div class="nav-pill" id="navPill"></div>
       <div class="nav-eyebrow">Menu</div>
       <button class="active" data-page="dashboard">
         <span class="ic">⌂</span><span>Dashboard</span>
@@ -1267,9 +1318,9 @@ button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
         </div>
         <form id="profileForm">
           <div class="settings-grid">
-            <div><label for="profileWeight">Berat (kg)</label><input id="profileWeight" type="number" min="1" step=".1" value="86"></div>
-            <div><label for="profileHeight">Tinggi (cm)</label><input id="profileHeight" type="number" min="1" step="1" value="170"></div>
-            <div><label for="profileAge">Usia</label><input id="profileAge" type="number" min="1" step="1" value="24"></div>
+            <div><label for="profileWeight">Berat (kg)</label><input id="profileWeight" type="number" min="1" step=".1" placeholder="Contoh: 86"></div>
+            <div><label for="profileHeight">Tinggi (cm)</label><input id="profileHeight" type="number" min="1" step="1" placeholder="Contoh: 170"></div>
+            <div><label for="profileAge">Usia</label><input id="profileAge" type="number" min="1" step="1" placeholder="Contoh: 24"></div>
             <div>
               <label for="profileActivity">Aktivitas harian</label>
               <select id="profileActivity">
@@ -1340,229 +1391,37 @@ button.secondary-btn:hover{background:var(--ink);color:var(--paper)}
             <h2>Checklist latihan</h2>
             <span class="workout-progress" id="workoutProgressText">0 / 0 exercises</span>
           </div>
-          <button class="secondary-btn" type="button" id="workoutReset">Reset</button>
+          <button class="secondary-btn" type="button" id="workoutReset">Reset hari ini</button>
         </div>
 
-        <div class="workout-static-list workout-accordion">
-
-          <div class="workout-day workout-accordion-item">
-            <button class="workout-day-toggle" type="button" aria-expanded="false">
-              <span class="workout-day-info">
-                <strong>DAY 1</strong>
-                <span>PUSH</span>
-              </span>
-              <span class="workout-day-right">
-                <span class="day-completion">0 / 8</span>
-                <span class="accordion-arrow">⌄</span>
-              </span>
-            </button>
-            <div class="workout-day-content">
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 01</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Floor Press</span><span class="workout-meta">3 × 8–12</span></div>
-                <div class="workout-row"><span class="workout-name">Dumbbell Lateral Raise (Standing)</span><span class="workout-meta">3 × 10–15</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 02</div></span></label>
-                <div class="workout-row"><span class="workout-name">Single-Arm Dumbbell Shoulder Press</span><span class="workout-meta">3 × 8–12</span></div>
-                <div class="workout-row"><span class="workout-name">Dumbbell Overhead Tricep Extension (Standing)</span><span class="workout-meta">3 × 10–15</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 03</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Fly</span><span class="workout-meta">3 × 12–15</span></div>
-                <div class="workout-row"><span class="workout-name">Front Raise (Alternating Dumbbell)</span><span class="workout-meta">3 × 10–15</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 04</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Pullover (Lying on Floor)</span><span class="workout-meta">2 × 10–15</span></div>
-                <div class="workout-row"><span class="workout-name">Dumbbell Tricep Kickback (Standing)</span><span class="workout-meta">2 × 12–15</span></div>
-              </div>
-            </div>
+        <div class="workout-datebar">
+          <div>
+            <p class="workout-date-label" id="workoutDateLabel">Hari ini</p>
+            <h3 class="workout-date-heading" id="workoutDateHeading">—</h3>
           </div>
-
-          <div class="workout-day workout-accordion-item">
-            <button class="workout-day-toggle" type="button" aria-expanded="false">
-              <span class="workout-day-info">
-                <strong>DAY 2</strong>
-                <span>PULL</span>
-              </span>
-              <span class="workout-day-right">
-                <span class="day-completion">0 / 8</span>
-                <span class="accordion-arrow">⌄</span>
-              </span>
-            </button>
-            <div class="workout-day-content">
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 01</div></span></label>
-                <div class="workout-row"><span class="workout-name">Single-Arm Dumbbell Row (Bent Over)</span><span class="workout-meta">3 × 8–12</span></div>
-                <div class="workout-row"><span class="workout-name">Hammer Curl (Standing)</span><span class="workout-meta">3 × 10–15</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 02</div></span></label>
-                <div class="workout-row"><span class="workout-name">Renegade Row</span><span class="workout-meta">3 × 10–15</span></div>
-                <div class="workout-row"><span class="workout-name">Single-Arm Dumbbell Curl (Standing)</span><span class="workout-meta">3 × 8–12</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 03</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Reverse Fly (Bent Over)</span><span class="workout-meta">3 × 10–15</span></div>
-                <div class="workout-row"><span class="workout-name">Wrist Curl (Seated or Standing)</span><span class="workout-meta">2 × 15–20</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 04</div></span></label>
-                <div class="workout-row"><span class="workout-name">Concentration Curl (Seated on Floor)</span><span class="workout-meta">2 × 12–15</span></div>
-                <div class="workout-row"><span class="workout-name">Reverse Wrist Curl (Seated or Standing)</span><span class="workout-meta">2 × 15–20</span></div>
-              </div>
-            </div>
+          <div class="datebox">
+            <button id="workoutPrevDate" type="button">‹</button>
+            <input id="workoutDateInput" type="date">
+            <button id="workoutNextDate" type="button">›</button>
           </div>
-
-          <div class="workout-day workout-accordion-item">
-            <button class="workout-day-toggle" type="button" aria-expanded="false">
-              <span class="workout-day-info">
-                <strong>DAY 3</strong>
-                <span>LEGS A</span>
-              </span>
-              <span class="workout-day-right">
-                <span class="day-completion">0 / 7</span>
-                <span class="accordion-arrow">⌄</span>
-              </span>
-            </button>
-            <div class="workout-day-content">
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 01</div></span></label>
-                <div class="workout-row"><span class="workout-name">Goblet Squat</span><span class="workout-meta">3 × 10–15</span></div>
-                <div class="workout-row"><span class="workout-name">Single Dumbbell Calf Raise (Standing)</span><span class="workout-meta">3 × 12–20</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 02</div></span></label>
-                <div class="workout-row"><span class="workout-name">Bulgarian Split Squat</span><span class="workout-meta">3 × 8–12</span></div>
-                <div class="workout-row"><span class="workout-name">Hanging Leg Raise</span><span class="workout-meta">3 × 10–15</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 03</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Romanian Deadlift</span><span class="workout-meta">3 × 8–12</span></div>
-                <div class="workout-row"><span class="workout-name">Plank</span><span class="workout-meta">2 × 30–60 detik</span></div>
-              </div>
-              <div class="workout-superset single">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 04</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Hip Thrust / Glute Bridge</span><span class="workout-meta">3 × 10–15</span></div>
-                <div class="workout-row"><span class="workout-name">Dumbbell Sumo Squat</span><span class="workout-meta">3 × 10–15 detik</span></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="workout-day workout-accordion-item rest-day">
-            <button class="workout-day-toggle" type="button" aria-expanded="false">
-              <span class="workout-day-info">
-                <strong>DAY 4</strong>
-                <span>REST</span>
-              </span>
-              <span class="workout-day-right">
-                <span class="day-completion">REST</span>
-                <span class="accordion-arrow">⌄</span>
-              </span>
-            </button>
-            <div class="workout-day-content">
-              <div class="notice">Hari istirahat. Tidak ada checklist latihan.</div>
-            </div>
-          </div>
-
-          <div class="workout-day workout-accordion-item">
-            <button class="workout-day-toggle" type="button" aria-expanded="false">
-              <span class="workout-day-info">
-                <strong>DAY 5</strong>
-                <span>UPPER</span>
-              </span>
-              <span class="workout-day-right">
-                <span class="day-completion">0 / 10</span>
-                <span class="accordion-arrow">⌄</span>
-              </span>
-            </button>
-            <div class="workout-day-content">
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 01</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Floor Press</span><span class="workout-meta">3 × 8–12</span></div>
-                <div class="workout-row"><span class="workout-name">Dumbbell Lateral Raise (Standing)</span><span class="workout-meta">3 × 12–20</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 02</div></span></label>
-                <div class="workout-row"><span class="workout-name">Single-Arm Dumbbell Row (Bent Over)</span><span class="workout-meta">3 × 8–12</span></div>
-                <div class="workout-row"><span class="workout-name">Dumbbell Front Raise</span><span class="workout-meta">2 × 12–15</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 03</div></span></label>
-                <div class="workout-row"><span class="workout-name">Single-Arm Dumbbell Shoulder Press</span><span class="workout-meta">2 × 8–12</span></div>
-                <div class="workout-row"><span class="workout-name">Hammer Curl (Standing)</span><span class="workout-meta">2 × 10–15</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 04</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Reverse Fly (Bent Over)</span><span class="workout-meta">2 × 12–20</span></div>
-                <div class="workout-row"><span class="workout-name">Dumbbell Overhead Tricep Extension</span><span class="workout-meta">2 × 10–15</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 05</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Fly</span><span class="workout-meta">2 × 12–15</span></div>
-                <div class="workout-row"><span class="workout-name">Dumbbell Shrug</span><span class="workout-meta">2 × 10–15</span></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="workout-day workout-accordion-item">
-            <button class="workout-day-toggle" type="button" aria-expanded="false">
-              <span class="workout-day-info">
-                <strong>DAY 6</strong>
-                <span>LOWER B</span>
-              </span>
-              <span class="workout-day-right">
-                <span class="day-completion">0 / 10</span>
-                <span class="accordion-arrow">⌄</span>
-              </span>
-            </button>
-            <div class="workout-day-content">
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 01</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Reverse Lunge</span><span class="workout-meta">3 × 8–12</span></div>
-                <div class="workout-row"><span class="workout-name">Single Dumbbell Calf Raise (Standing)</span><span class="workout-meta">3 × 15–20</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 02</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Sumo Squat</span><span class="workout-meta">3 × 10–15</span></div>
-                <div class="workout-row"><span class="workout-name">Weighted Leg Raise</span><span class="workout-meta">3 × 10–15</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 03</div></span></label>
-                <div class="workout-row"><span class="workout-name">Single-Leg Dumbbell Deadlift</span><span class="workout-meta">3 × 8–12</span></div>
-                <div class="workout-row"><span class="workout-name">One-Arm Plank</span><span class="workout-meta">2 × 30–45 detik</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 04</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Hip Thrust / Glute Bridge</span><span class="workout-meta">3 × 10–15</span></div>
-                <div class="workout-row"><span class="workout-name">Seated Dumbbell Calf Raise</span><span class="workout-meta">3 × 15–20</span></div>
-              </div>
-              <div class="workout-superset">
-                <label class="superset-check-label"><input class="workout-check" type="checkbox"><span><div class="superset-label">SUPERSET 05</div></span></label>
-                <div class="workout-row"><span class="workout-name">Dumbbell Lateral Lunge</span><span class="workout-meta">2 × 10–15</span></div>
-                <div class="workout-row"><span class="workout-name">Dumbbell Hamstring Curl</span><span class="workout-meta">3 × 10–15</span></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="workout-day workout-accordion-item rest-day">
-            <button class="workout-day-toggle" type="button" aria-expanded="false">
-              <span class="workout-day-info">
-                <strong>DAY 7</strong>
-                <span>REST</span>
-              </span>
-              <span class="workout-day-right">
-                <span class="day-completion">REST</span>
-                <span class="accordion-arrow">⌄</span>
-              </span>
-            </button>
-            <div class="workout-day-content">
-              <div class="notice">Hari istirahat. Tidak ada checklist latihan.</div>
-            </div>
-          </div>
-
         </div>
+
+        <div class="workout-status-row">
+          <span class="workout-status-badge" id="workoutStatusBadge">—</span>
+          <div class="workout-status-toggle">
+            <button type="button" id="workoutMarkWorkout">Hari Latihan</button>
+            <button type="button" id="workoutMarkRest">Hari Libur</button>
+          </div>
+          <select class="workout-split-select" id="workoutSplitSelect" style="display:none">
+            <option value="push">Push</option>
+            <option value="pull">Pull</option>
+            <option value="legsA">Legs A</option>
+            <option value="upper">Upper</option>
+            <option value="lowerB">Lower B</option>
+          </select>
+        </div>
+
+        <div id="workoutDayContainer"></div>
       </div>
     </section>
   </main>
@@ -1585,7 +1444,7 @@ const $$ = (s, root=document) => [...root.querySelectorAll(s)];
 const FOOD_KEY = "dapurData_foods_v2";
 const PROFILE_KEY = "dapurData_profile_v2";
 const THEME_KEY = "dapurData_theme_v2";
-const WORKOUT_CHECK_KEY = "dapurData_workout_checklist_v1";
+const WORKOUT_KEY = "dapurData_workout_v3";
 
 const defaultProfile = {
   weight:86,height:170,age:24,activity:1.55,goal:"loss",
@@ -1594,6 +1453,76 @@ const defaultProfile = {
 let foods = JSON.parse(localStorage.getItem(FOOD_KEY) || "[]");
 let profile = {...defaultProfile, ...(JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"))};
 let selectedDate = new Date().toISOString().slice(0,10);
+
+/* ---------- WORKOUT SPLITS DATA ---------- */
+const WORKOUT_SPLITS = {
+  push:{label:"PUSH", supersets:[
+    {name:"SUPERSET 01", exercises:[["Dumbbell Floor Press","3 × 8–12"],["Dumbbell Lateral Raise (Standing)","3 × 10–15"]]},
+    {name:"SUPERSET 02", exercises:[["Single-Arm Dumbbell Shoulder Press","3 × 8–12"],["Dumbbell Overhead Tricep Extension (Standing)","3 × 10–15"]]},
+    {name:"SUPERSET 03", exercises:[["Dumbbell Fly","3 × 12–15"],["Front Raise (Alternating Dumbbell)","3 × 10–15"]]},
+    {name:"SUPERSET 04", exercises:[["Dumbbell Pullover (Lying on Floor)","2 × 10–15"],["Dumbbell Tricep Kickback (Standing)","2 × 12–15"]]}
+  ]},
+  pull:{label:"PULL", supersets:[
+    {name:"SUPERSET 01", exercises:[["Single-Arm Dumbbell Row (Bent Over)","3 × 8–12"],["Hammer Curl (Standing)","3 × 10–15"]]},
+    {name:"SUPERSET 02", exercises:[["Renegade Row","3 × 10–15"],["Single-Arm Dumbbell Curl (Standing)","3 × 8–12"]]},
+    {name:"SUPERSET 03", exercises:[["Dumbbell Reverse Fly (Bent Over)","3 × 10–15"],["Wrist Curl (Seated or Standing)","2 × 15–20"]]},
+    {name:"SUPERSET 04", exercises:[["Concentration Curl (Seated on Floor)","2 × 12–15"],["Reverse Wrist Curl (Seated or Standing)","2 × 15–20"]]}
+  ]},
+  legsA:{label:"LEGS A", supersets:[
+    {name:"SUPERSET 01", exercises:[["Goblet Squat","3 × 10–15"],["Single Dumbbell Calf Raise (Standing)","3 × 12–20"]]},
+    {name:"SUPERSET 02", exercises:[["Bulgarian Split Squat","3 × 8–12"],["Hanging Leg Raise","3 × 10–15"]]},
+    {name:"SUPERSET 03", exercises:[["Dumbbell Romanian Deadlift","3 × 8–12"],["Plank","2 × 30–60 detik"]]},
+    {name:"SUPERSET 04", exercises:[["Dumbbell Hip Thrust / Glute Bridge","3 × 10–15"],["Dumbbell Sumo Squat","3 × 10–15"]]}
+  ]},
+  upper:{label:"UPPER", supersets:[
+    {name:"SUPERSET 01", exercises:[["Dumbbell Floor Press","3 × 8–12"],["Dumbbell Lateral Raise (Standing)","3 × 12–20"]]},
+    {name:"SUPERSET 02", exercises:[["Single-Arm Dumbbell Row (Bent Over)","3 × 8–12"],["Dumbbell Front Raise","2 × 12–15"]]},
+    {name:"SUPERSET 03", exercises:[["Single-Arm Dumbbell Shoulder Press","2 × 8–12"],["Hammer Curl (Standing)","2 × 10–15"]]},
+    {name:"SUPERSET 04", exercises:[["Dumbbell Reverse Fly (Bent Over)","2 × 12–20"],["Dumbbell Overhead Tricep Extension","2 × 10–15"]]},
+    {name:"SUPERSET 05", exercises:[["Dumbbell Fly","2 × 12–15"],["Dumbbell Shrug","2 × 10–15"]]}
+  ]},
+  lowerB:{label:"LOWER B", supersets:[
+    {name:"SUPERSET 01", exercises:[["Dumbbell Reverse Lunge","3 × 8–12"],["Single Dumbbell Calf Raise (Standing)","3 × 15–20"]]},
+    {name:"SUPERSET 02", exercises:[["Dumbbell Sumo Squat","3 × 10–15"],["Weighted Leg Raise","3 × 10–15"]]},
+    {name:"SUPERSET 03", exercises:[["Single-Leg Dumbbell Deadlift","3 × 8–12"],["One-Arm Plank","2 × 30–45 detik"]]},
+    {name:"SUPERSET 04", exercises:[["Dumbbell Hip Thrust / Glute Bridge","3 × 10–15"],["Seated Dumbbell Calf Raise","3 × 15–20"]]},
+    {name:"SUPERSET 05", exercises:[["Dumbbell Lateral Lunge","2 × 10–15"],["Dumbbell Hamstring Curl","3 × 10–15"]]}
+  ]}
+};
+/* JS getDay(): 0=Minggu,1=Senin,...6=Sabtu */
+const WEEKDAY_DEFAULT_SPLIT = [null,"push","pull","legsA",null,"upper","lowerB"];
+
+let workoutData = JSON.parse(localStorage.getItem(WORKOUT_KEY) || "{}");
+let workoutSelectedDate = new Date().toISOString().slice(0,10);
+
+function saveWorkoutData(){ localStorage.setItem(WORKOUT_KEY, JSON.stringify(workoutData)); }
+
+function getEffectiveWorkout(date){
+  const entry = workoutData[date] || {};
+  const weekday = new Date(date+"T12:00:00").getDay();
+  const defaultSplit = WEEKDAY_DEFAULT_SPLIT[weekday];
+  if(entry.override === "rest"){
+    return {isRest:true, splitKey:null, manual:true};
+  }
+  if(entry.override === "workout"){
+    const key = entry.type || defaultSplit || "push";
+    return {isRest:false, splitKey:key, manual:true};
+  }
+  if(defaultSplit) return {isRest:false, splitKey:defaultSplit, manual:false};
+  return {isRest:true, splitKey:null, manual:false};
+}
+function getChecks(date, splitKey){
+  const entry = workoutData[date] || {};
+  const count = WORKOUT_SPLITS[splitKey] ? WORKOUT_SPLITS[splitKey].supersets.length : 0;
+  let checks = Array.isArray(entry.checks) ? entry.checks.slice(0,count) : [];
+  while(checks.length < count) checks.push(false);
+  return checks;
+}
+function setEntry(date, patch){
+  const entry = {...(workoutData[date]||{}), ...patch};
+  workoutData[date] = entry;
+  saveWorkoutData();
+}
 
 function toast(message){
   const el=$("#toast");
@@ -1613,11 +1542,77 @@ function totals(date){
     carb:a.carb+(+x.carb||0),fat:a.fat+(+x.fat||0)
   }),{kcal:0,protein:0,carb:0,fat:0});
 }
+function escapeHtml(v){
+  return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+/* Presentation-only helper: sets text and plays a quiet "pop" when the value actually changes. */
+function pulseText(el, text){
+  if(!el) return;
+  if(el.textContent===text) return;
+  el.textContent=text;
+  el.classList.remove("number-pop");
+  void el.offsetWidth;
+  el.classList.add("number-pop");
+}
+
+/* Presentation-only helper: tweens a displayed integer from its current value up/down
+   to a new target using an eased requestAnimationFrame loop, formatting with the
+   supplied function (e.g. thousands separators) on every frame. Falls back to an
+   instant set for reduced-motion or when the element has no readable previous value. */
+const __numberTweens = new WeakMap();
+function tweenNumber(el, targetValue, formatFn, opts={}){
+  if(!el) return;
+  const suffix = opts.suffix || "";
+  const format = formatFn || (v=>String(Math.round(v)));
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const prevRaw = el.dataset.rawValue;
+  const from = prevRaw!==undefined && Number.isFinite(+prevRaw) ? +prevRaw : targetValue;
+  el.dataset.rawValue = String(targetValue);
+
+  if(reduceMotion || from===targetValue){
+    el.textContent = format(targetValue)+suffix;
+    return;
+  }
+
+  const existing = __numberTweens.get(el);
+  if(existing) cancelAnimationFrame(existing);
+
+  const duration = opts.duration || 520;
+  const start = performance.now();
+  const ease = t => 1-Math.pow(1-t,3); // ease-out cubic — quick start, gentle settle
+
+  function frame(now){
+    const t = Math.min(1,(now-start)/duration);
+    const eased = ease(t);
+    const value = from + (targetValue-from)*eased;
+    el.textContent = format(value)+suffix;
+    if(t<1){
+      __numberTweens.set(el, requestAnimationFrame(frame));
+    }else{
+      el.textContent = format(targetValue)+suffix;
+      __numberTweens.delete(el);
+      el.classList.remove("number-pop");
+      void el.offsetWidth;
+      el.classList.add("number-pop");
+    }
+  }
+  __numberTweens.set(el, requestAnimationFrame(frame));
+}
+const fmtID = v => Math.round(v).toLocaleString("id-ID");
+
+function workoutProgressForDate(date){
+  const eff = getEffectiveWorkout(date);
+  if(eff.isRest) return {done:0,total:0,pct:0,isRest:true};
+  const checks = getChecks(date, eff.splitKey);
+  const done = checks.filter(Boolean).length;
+  const total = checks.length;
+  return {done,total,pct: total?Math.round(done/total*100):0, isRest:false};
+}
 function renderDashboard(){
   const list=foodsForDate(selectedDate), t=totals(selectedDate);
-  pulseText($("#totalKcal"),Math.round(t.kcal).toLocaleString("id-ID"));
+  tweenNumber($("#totalKcal"), t.kcal, fmtID);
   $("#targetKcal").textContent=Math.round(profile.target).toLocaleString("id-ID")+" kcal";
-  pulseText($("#remainingKcal"),Math.max(0,Math.round(profile.target-t.kcal)).toLocaleString("id-ID"));
+  tweenNumber($("#remainingKcal"), Math.max(0,profile.target-t.kcal), fmtID);
   pulseText($("#proteinTotal"),Math.round(t.protein)+" g");
   pulseText($("#carbTotal"),Math.round(t.carb)+" g");
   pulseText($("#fatTotal"),Math.round(t.fat)+" g");
@@ -1628,6 +1623,9 @@ function renderDashboard(){
   const pct=profile.target?Math.min(100,Math.round(t.kcal/profile.target*100)):0;
   $("#calorieProgress").style.width=pct+"%";
   $("#calorieProgress").classList.toggle("has-fill",pct>0);
+
+  const wp = workoutProgressForDate(selectedDate);
+  pulseText($("#workoutProgress"), wp.isRest ? "LIBUR" : wp.pct+"%");
 
   const mealList=$("#mealList");
   if(!list.length){
@@ -1641,18 +1639,6 @@ function renderDashboard(){
         <button class="remove" type="button" data-remove="${x.id}" aria-label="Hapus">×</button>
       </div>`).join("");
   }
-}
-function escapeHtml(v){
-  return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
-}
-/* Presentation-only helper: sets text and plays a quiet "pop" when the value actually changes. */
-function pulseText(el, text){
-  if(!el) return;
-  if(el.textContent===text) return;
-  el.textContent=text;
-  el.classList.remove("number-pop");
-  void el.offsetWidth;
-  el.classList.add("number-pop");
 }
 function renderHistory(){
   const rows=[...foods].sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
@@ -1672,7 +1658,7 @@ function renderStats(){
     days.push({key,total:totals(key).kcal,label:d.toLocaleDateString("id-ID",{weekday:"short"}).slice(0,3)});
   }
   const avg=days.reduce((a,x)=>a+x.total,0)/7;
-  pulseText($("#avg7"),Math.round(avg).toLocaleString("id-ID")+" kcal");
+  tweenNumber($("#avg7"), avg, fmtID, {suffix:" kcal"});
   pulseText($("#allMealCount"),String(foods.length));
   pulseText($("#statsTarget"),Math.round(profile.target).toLocaleString("id-ID"));
   const max=Math.max(profile.target,...days.map(x=>x.total),1);
@@ -1709,12 +1695,11 @@ $("#profileActivity").addEventListener("change",updateActivityHelp);
 updateActivityHelp();
 
 function calcProfile(options={saveRecommendation:true}){
-  const w=+$("#profileWeight").value||86;
-  const h=+$("#profileHeight").value||170;
-  const a=+$("#profileAge").value||24;
+  const w=+$("#profileWeight").value||profile.weight||86;
+  const h=+$("#profileHeight").value||profile.height||170;
+  const a=+$("#profileAge").value||profile.age||24;
   const act=+$("#profileActivity").value||1.55;
 
-  // Mifflin-St Jeor (versi saat ini memakai konstanta pria seperti kalkulator sebelumnya).
   const bmr=10*w+6.25*h-5*a+5;
   const tdee=bmr*act;
 
@@ -1730,9 +1715,9 @@ function calcProfile(options={saveRecommendation:true}){
   profile.customTarget=hasCustom ? Math.round(custom/50)*50 : null;
   profile.target=profile.customTarget ?? recommended;
 
-  pulseText($("#bmrValue"),Math.round(bmr).toLocaleString("id-ID"));
-  pulseText($("#tdeeValue"),Math.round(tdee).toLocaleString("id-ID"));
-  pulseText($("#recommendedKcal"),recommended.toLocaleString("id-ID"));
+  tweenNumber($("#bmrValue"), bmr, fmtID);
+  tweenNumber($("#tdeeValue"), tdee, fmtID);
+  tweenNumber($("#recommendedKcal"), recommended, fmtID);
   pulseText($("#recommendedProtein"),Math.round(w*1.8)+" g");
   pulseText($("#recommendedFat"),Math.round(w*.7)+" g");
 
@@ -1752,72 +1737,173 @@ function calcProfile(options={saveRecommendation:true}){
   return {bmr,tdee,recommended,target:profile.target,customTarget:profile.customTarget};
 }
 function renderProfile(){
-  $("#profileWeight").value=profile.weight;
-  $("#profileHeight").value=profile.height;
-  $("#profileAge").value=profile.age;
+  $("#profileWeight").value="";
+  $("#profileWeight").placeholder="Contoh: "+profile.weight;
+  $("#profileHeight").value="";
+  $("#profileHeight").placeholder="Contoh: "+profile.height;
+  $("#profileAge").value="";
+  $("#profileAge").placeholder="Contoh: "+profile.age;
   $("#profileActivity").value=profile.activity;
   $("#customTarget").value=profile.customTarget ?? "";
   $$(".target-option").forEach(b=>b.classList.toggle("active",b.dataset.goal===profile.goal));
   calcProfile({saveRecommendation:false});
 }
+
+/* ---------- sliding nav pill: fluid highlight that glides between menu items ---------- */
+function moveNavPill(navEl, pillEl, activeBtn){
+  if(!navEl || !pillEl || !activeBtn) return;
+  const navRect=navEl.getBoundingClientRect();
+  const btnRect=activeBtn.getBoundingClientRect();
+  pillEl.style.transform=`translateY(${btnRect.top-navRect.top}px)`;
+  pillEl.style.height=btnRect.height+"px";
+  pillEl.classList.add("ready");
+}
+
 function navigate(page){
-  $$(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+page));
-  $$("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  const titles={dashboard:["Dashboard","Pantau asupan kalori dan progresmu hari ini."],add:["Tambah Makanan","Masukkan makanan dan nilai nutrisinya."],history:["Riwayat","Semua catatan makanan yang tersimpan."],stats:["Statistik","Lihat pola asupan 7 hari terakhir."],profile:["Profil & Target","Atur data tubuh dan target kalorimu."],workout:["Latihan","Centang latihan yang sudah selesai."]};
-  $("#pageTitle").textContent=titles[page][0];
-  $("#pageSubtitle").textContent=titles[page][1];
-  if(page==="stats")renderStats();
+  const applyNav=()=>{
+    $$(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+page));
+    $$("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+    const titles={dashboard:["Dashboard","Pantau asupan kalori dan progresmu hari ini."],add:["Tambah Makanan","Masukkan makanan dan nilai nutrisinya."],history:["Riwayat","Semua catatan makanan yang tersimpan."],stats:["Statistik","Lihat pola asupan 7 hari terakhir."],profile:["Profil & Target","Atur data tubuh dan target kalorimu."],workout:["Latihan","Pilih tanggal dan tandai latihan hari itu."]};
+    $("#pageTitle").textContent=titles[page][0];
+    $("#pageSubtitle").textContent=titles[page][1];
+    if(page==="stats")renderStats();
+    if(page==="workout")renderWorkoutPage();
+    const sideBtn=$(`.sidebar .nav button[data-page="${page}"]`);
+    if(sideBtn) moveNavPill($("#navPill").parentElement, $("#navPill"), sideBtn);
+  };
+  const reduceMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(document.startViewTransition && !reduceMotion){
+    document.startViewTransition(applyNav);
+  }else{
+    applyNav();
+  }
 }
-function initWorkoutChecklist(){
-  const checks=$$(".workout-static-list .workout-check");
-  let saved=[];
-  try{saved=JSON.parse(localStorage.getItem(WORKOUT_CHECK_KEY)||"[]")||[]}catch{}
 
-  checks.forEach((cb,i)=>{
-    cb.checked=!!saved[i];
-    cb.closest(".workout-superset")?.classList.toggle("done",cb.checked);
+/* ---------- WORKOUT: date-based render ---------- */
+const WEEKDAY_NAMES_ID=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
 
+function renderWorkoutPage(){
+  const date = workoutSelectedDate;
+  $("#workoutDateInput").value = date;
+
+  const todayKey = new Date().toISOString().slice(0,10);
+  $("#workoutDateLabel").textContent = date===todayKey ? "Hari ini" : dateLabel(date);
+  const weekday = new Date(date+"T12:00:00").getDay();
+  $("#workoutDateHeading").textContent = WEEKDAY_NAMES_ID[weekday]+", "+dateLabel(date);
+
+  const eff = getEffectiveWorkout(date);
+  const badge = $("#workoutStatusBadge");
+  const markWorkoutBtn = $("#workoutMarkWorkout");
+  const markRestBtn = $("#workoutMarkRest");
+  const splitSelect = $("#workoutSplitSelect");
+
+  markWorkoutBtn.classList.toggle("active", !eff.isRest);
+  markRestBtn.classList.toggle("active", eff.isRest);
+
+  if(eff.isRest){
+    badge.textContent = "HARI LIBUR";
+    badge.className = "workout-status-badge bad";
+    splitSelect.style.display = "none";
+  }else{
+    const splitLabel = WORKOUT_SPLITS[eff.splitKey].label;
+    badge.textContent = "LATIHAN — "+splitLabel;
+    badge.className = "workout-status-badge good";
+    splitSelect.style.display = "inline-block";
+    splitSelect.value = eff.splitKey;
+  }
+
+  const container = $("#workoutDayContainer");
+  if(eff.isRest){
+    container.innerHTML = `
+      <div class="workout-rest-card">
+        <b>Hari istirahat</b>
+        <p>Tidak ada checklist latihan untuk tanggal ini. Kamu tetap bisa menandainya sebagai hari latihan lewat tombol di atas.</p>
+      </div>`;
+    $("#workoutProgressText").textContent = "0 / 0 exercises";
+    return;
+  }
+
+  const split = WORKOUT_SPLITS[eff.splitKey];
+  const checks = getChecks(date, eff.splitKey);
+  container.innerHTML = `
+    <div class="workout-day">
+      <div class="workout-day-title">${split.label}</div>
+      ${split.supersets.map((ss,i)=>`
+        <div class="workout-superset${checks[i]?" done":""}" data-idx="${i}">
+          <label class="superset-check-label">
+            <input class="workout-check" type="checkbox" data-idx="${i}" ${checks[i]?"checked":""}>
+            <span><div class="superset-label">${escapeHtml(ss.name)}</div></span>
+          </label>
+          ${ss.exercises.map(ex=>`<div class="workout-row"><span class="workout-name">${escapeHtml(ex[0])}</span><span class="workout-meta">${escapeHtml(ex[1])}</span></div>`).join("")}
+        </div>`).join("")}
+    </div>`;
+
+  $$(".workout-check", container).forEach(cb=>{
     cb.addEventListener("change",()=>{
-      const state=checks.map(x=>x.checked);
-      localStorage.setItem(WORKOUT_CHECK_KEY,JSON.stringify(state));
-      cb.closest(".workout-superset")?.classList.toggle("done",cb.checked);
-      updateWorkoutProgress();
-      updateWorkoutDayCounts();
+      const idx = +cb.dataset.idx;
+      const current = getChecks(date, eff.splitKey);
+      current[idx] = cb.checked;
+      setEntry(date, {checks: current});
+      cb.closest(".workout-superset").classList.toggle("done", cb.checked);
+      updateWorkoutProgressText(date, eff.splitKey);
+      if(date===selectedDate) renderDashboard();
     });
   });
 
-  $$(".workout-day-toggle").forEach(toggle=>{
-    toggle.addEventListener("click",()=>{
-      const item=toggle.closest(".workout-accordion-item");
-      const open=item.classList.toggle("open");
-      toggle.setAttribute("aria-expanded",open?"true":"false");
-    });
-  });
-
-  updateWorkoutProgress();
-  updateWorkoutDayCounts();
+  updateWorkoutProgressText(date, eff.splitKey);
+}
+function updateWorkoutProgressText(date, splitKey){
+  const checks = getChecks(date, splitKey);
+  const done = checks.filter(Boolean).length;
+  $("#workoutProgressText").textContent = `${done} / ${checks.length} exercises`;
 }
 
-function updateWorkoutDayCounts(){
-  $$(".workout-accordion-item").forEach(item=>{
-    const checks=$$(".workout-check",item);
-    const counter=$(".day-completion",item);
-    if(!counter)return;
-    if(!checks.length){
-      counter.textContent="REST";
-      return;
-    }
-    const done=checks.filter(c=>c.checked).length;
-    counter.textContent=`${done} / ${checks.length}`;
-  });
-}
-function updateWorkoutProgress(){
-  const checks=$$(".workout-static-list .workout-check");
-  const done=checks.filter(c=>c.checked).length,total=checks.length;
-  const pct=total?Math.round(done/total*100):0;
-  pulseText($("#workoutProgress"),pct+"%");
-  $("#workoutProgressText").textContent=`${done} / ${total} exercises`;
-}
+$("#workoutDateInput").addEventListener("change",e=>{
+  workoutSelectedDate = e.target.value || workoutSelectedDate;
+  renderWorkoutPage();
+});
+$("#workoutPrevDate").onclick=()=>{
+  const d=new Date(workoutSelectedDate+"T12:00:00");d.setDate(d.getDate()-1);
+  workoutSelectedDate=d.toISOString().slice(0,10);renderWorkoutPage();
+};
+$("#workoutNextDate").onclick=()=>{
+  const d=new Date(workoutSelectedDate+"T12:00:00");d.setDate(d.getDate()+1);
+  workoutSelectedDate=d.toISOString().slice(0,10);renderWorkoutPage();
+};
+$("#workoutMarkWorkout").onclick=()=>{
+  const date = workoutSelectedDate;
+  const weekday = new Date(date+"T12:00:00").getDay();
+  const defaultSplit = WEEKDAY_DEFAULT_SPLIT[weekday];
+  const entry = workoutData[date] || {};
+  const type = entry.type || defaultSplit || "push";
+  setEntry(date, {override:"workout", type});
+  renderWorkoutPage();
+  if(date===selectedDate) renderDashboard();
+  toast("Ditandai sebagai hari latihan.");
+};
+$("#workoutMarkRest").onclick=()=>{
+  const date = workoutSelectedDate;
+  setEntry(date, {override:"rest"});
+  renderWorkoutPage();
+  if(date===selectedDate) renderDashboard();
+  toast("Ditandai sebagai hari libur.");
+};
+$("#workoutSplitSelect").addEventListener("change",e=>{
+  const date = workoutSelectedDate;
+  setEntry(date, {override:"workout", type:e.target.value, checks:null});
+  renderWorkoutPage();
+  if(date===selectedDate) renderDashboard();
+});
+$("#workoutReset").onclick=()=>{
+  const date = workoutSelectedDate;
+  const entry = {...(workoutData[date]||{})};
+  delete entry.checks;
+  workoutData[date]=entry;
+  saveWorkoutData();
+  renderWorkoutPage();
+  if(date===selectedDate) renderDashboard();
+  toast("Checklist latihan tanggal ini direset.");
+};
 
 $$("[data-page]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.page)));
 $("#quickAdd").onclick=()=>navigate("add");
@@ -1828,6 +1914,27 @@ let selectedFoodImage=null, selectedFoodImageData="", currentFoodMode="both";
 function handleFoodImage(file){if(!file)return;if(!file.type.startsWith("image/")){toast("File harus berupa gambar.");return}if(file.size>12*1024*1024){toast("Ukuran foto maksimal 12 MB.");return}selectedFoodImage=file;const r=new FileReader();r.onload=()=>{$("#foodPhotoPreview").src=r.result;$("#foodPhotoPreview").style.display="block";selectedFoodImageData=r.result;$("#foodPhotoMeta").textContent=`Foto dipilih: ${file.name} · ${(file.size/1024/1024).toFixed(2)} MB`};r.readAsDataURL(file)}
 $("#takeFoodPhoto").onclick=()=>$("#foodCamera").click();$("#chooseFoodPhoto").onclick=()=>$("#foodGallery").click();$("#foodCamera").addEventListener("change",e=>handleFoodImage(e.target.files?.[0]));$("#foodGallery").addEventListener("change",e=>handleFoodImage(e.target.files?.[0]));
 $$(".mode button").forEach(b=>b.addEventListener("click",()=>{currentFoodMode=b.dataset.mode;$$('.mode button').forEach(x=>x.classList.toggle('active',x===b));$("#photoField").style.display=currentFoodMode==="text"?"none":"block";$("#textField").style.display=currentFoodMode==="photo"?"none":"block"}));
+
+/* drag & drop onto the photo upload zone — purely additive, same handleFoodImage path as click/camera */
+(function initFoodDragDrop(){
+  const zone=$("#photoField");
+  if(!zone) return;
+  ["dragenter","dragover"].forEach(evt=>zone.addEventListener(evt,e=>{
+    e.preventDefault();e.stopPropagation();
+    zone.classList.add("drag-over");
+  }));
+  ["dragleave","dragend"].forEach(evt=>zone.addEventListener(evt,e=>{
+    if(evt==="dragleave" && zone.contains(e.relatedTarget)) return;
+    zone.classList.remove("drag-over");
+  }));
+  zone.addEventListener("drop",e=>{
+    e.preventDefault();e.stopPropagation();
+    zone.classList.remove("drag-over");
+    const file=e.dataTransfer?.files?.[0];
+    if(file) handleFoodImage(file);
+  });
+})();
+
 function resetFoodAnalyzer(){$("#foodCamera").value="";$("#foodGallery").value="";selectedFoodImage=null;selectedFoodImageData="";$("#foodPhotoPreview").src="";$("#foodPhotoPreview").style.display="none";$("#foodPhotoMeta").textContent="Belum ada foto dipilih.";$("#description").value="";$("#manualKcal").value="";$("#aiResult").style.display="none";$("#aiResult").innerHTML=""}
 async function analyzeFood(){const desc=$("#description").value.trim(),photo=selectedFoodImage,manual=Number($("#manualKcal").value)||0;if(currentFoodMode==="photo"&&!photo)return toast("Ambil foto atau pilih foto dari galeri terlebih dahulu.");if(currentFoodMode==="text"&&!desc)return toast("Tulis deskripsi makanan terlebih dahulu.");if(currentFoodMode==="both"&&!photo&&!desc)return toast("Masukkan foto atau deskripsi makanan.");const form=new FormData();if(desc)form.append("description",desc);if(photo)form.append("photo",photo);form.append("meal",$("#mealType").value);const btn=$("#analyzeFoodBtn"),box=$("#aiResult");btn.disabled=true;btn.innerHTML="Menganalisis dengan Gemini…";box.style.display="block";box.innerHTML='<div class="ai-loading"><span class="ai-spinner"></span><div><b>Menganalisis dengan Gemini…</b><div class="muted" style="font-size:12px;margin-top:3px">Foto dan/atau deskripsi sedang dianalisis.</div></div></div>';try{const response=await fetch("/api/analyze-food",{method:"POST",body:form});let data;try{data=await response.json()}catch{throw new Error("Backend mengembalikan respons yang tidak valid.")}if(!response.ok)throw new Error(data?.error||`Analisis gagal (${response.status}).`);const detected=Array.isArray(data.foods)?data.foods:[],total=data.total||{},score=Math.max(0,Math.min(10,Number(data.score)||0)),confidence=Math.max(0,Math.min(1,Number(data.confidence)||0)),level=score>=8?"good":score>=6?"mid":"bad",label=data.label||"Cukup";const portion=f=>f.portion_g!=null?`${Math.round(f.portion_g)} g`:f.portion_ml!=null?`${Math.round(f.portion_ml)} ml`:"Porsi tidak diketahui";const foodsHtml=detected.length?`<div class="ai-food-list">${detected.map(f=>`<div class="ai-food"><div><b>${escapeHtml(f.name)}</b><small>${portion(f)} · Confidence ${Math.round((Number(f.confidence)||0)*100)}%</small></div><strong>${Math.round(Number(f.calories)||0)} kcal</strong></div>`).join("")}</div>`:'<div class="muted" style="margin-top:12px">Gemini tidak menemukan item makanan yang dapat diidentifikasi.</div>';const result={id:Date.now().toString(),date:selectedDate,name:detected.length===1?detected[0].name:(detected.length?"Mixed meal":"Food analysis"),kcal:manual>0?manual:Number(total.calories)||0,protein:Number(total.protein_g)||0,carb:Number(total.carbs_g)||0,fat:Number(total.fat_g)||0,time:new Date().toTimeString().slice(0,5),note:data.assessment||"",image:selectedFoodImageData||"",source:photo&&desc?"photo+description":photo?"photo":"description",score:Math.round(score*10)/10,confidence};box.innerHTML=`<div class="result-head"><div><div class="muted">Gemini AI estimate</div><div style="font-size:25px;font-weight:850;margin-top:4px">${escapeHtml(result.name)}</div><div class="muted" style="font-size:12px;margin-top:5px">Confidence keseluruhan: ${Math.round(confidence*100)}%</div></div><div class="score">${score.toFixed(score%1?1:0)}/10 <span class="badge ${level}">${escapeHtml(label)}</span></div></div>${foodsHtml}<div class="macro-grid" style="margin-top:18px"><div class="macro"><b>${Math.round(result.kcal)}</b><span>Calories${manual>0?" (manual)":""}</span></div><div class="macro"><b>${Math.round(result.protein)}g</b><span>Protein</span></div><div class="macro"><b>${Math.round(result.carb)}g</b><span>Carbs</span></div></div><div class="macro-grid" style="margin-top:12px"><div class="macro"><b>${Math.round(result.fat)}g</b><span>Fat</span></div><div class="macro"><b>${detected.length}</b><span>Items detected</span></div><div class="macro"><b>${escapeHtml(result.source)}</b><span>Input</span></div></div><div class="suggestion"><b>AI assessment</b><br>${escapeHtml(data.assessment||"")}<br><br><b>Suggestion</b><br>${escapeHtml(data.suggestion||"")}</div><button class="add-btn" style="margin-top:15px" id="saveAI" type="button">＋ Save to ${selectedDate}</button>`;$("#saveAI").onclick=()=>{foods.push(result);saveFoods();resetFoodAnalyzer();renderDashboard();renderHistory();renderStats();toast("Hasil Gemini berhasil disimpan");navigate("dashboard")}}catch(err){console.error(err);box.innerHTML=`<div class="ai-error"><b>Analisis Gemini gagal</b><br>${escapeHtml(err?.message||"Terjadi kesalahan saat menghubungi backend.")}</div>`}finally{btn.disabled=false;btn.innerHTML="Analyze with AI"}}
 $("#analyzeFoodBtn").addEventListener("click",analyzeFood);
@@ -1890,8 +1997,8 @@ function applyTheme(theme, sourceButton=null){
   });
 }
 
-$("#lightTheme").onclick=(e)=>applyTheme("light",e.currentTarget);
-$("#darkTheme").onclick=(e)=>applyTheme("dark",e.currentTarget);
+$("#lightTheme").onclick=(e)=>applyTheme("dark",e.currentTarget);
+$("#darkTheme").onclick=(e)=>applyTheme("light",e.currentTarget);
 
 $$(".target-option").forEach(b=>b.addEventListener("click",()=>{
   profile.goal=b.dataset.goal;
@@ -1904,22 +2011,16 @@ $("#customTarget").addEventListener("input",()=>{
 });
 
 $("#calculateRecommendation").onclick=()=>{
-  // Hanya menghitung rekomendasi lokal; target manual tetap dipertahankan.
   calcProfile({saveRecommendation:false});
   toast("Rekomendasi berhasil dihitung.");
 };
 
-/*
-  AI PROFILE RECOMMENDATION
-  Endpoint ini sengaja dipanggil ke backend agar GEMINI_API_KEY tidak pernah
-  ditaruh di browser. Jika endpoint belum tersedia, kalkulator lokal tetap bekerja.
-*/
 $("#askAIRecommendation").onclick=async()=>{
   const btn=$("#askAIRecommendation");
   const payload={
-    weight:+$("#profileWeight").value||0,
-    height:+$("#profileHeight").value||0,
-    age:+$("#profileAge").value||0,
+    weight:+$("#profileWeight").value||profile.weight||0,
+    height:+$("#profileHeight").value||profile.height||0,
+    age:+$("#profileAge").value||profile.age||0,
     activity:+$("#profileActivity").value||1.55,
     goal:profile.goal,
     currentTarget:+$("#customTarget").value||null
@@ -1950,7 +2051,7 @@ $("#askAIRecommendation").onclick=async()=>{
 
     const rounded=Math.round(recommendation/50)*50;
     profile.recommendedTarget=rounded;
-    $("#recommendedKcal").textContent=rounded.toLocaleString("id-ID");
+    tweenNumber($("#recommendedKcal"), rounded, fmtID);
     if(data.protein){
       $("#recommendedProtein").textContent=Math.round(Number(data.protein))+" g";
     }
@@ -1958,7 +2059,6 @@ $("#askAIRecommendation").onclick=async()=>{
       $("#recommendedFat").textContent=Math.round(Number(data.fat))+" g";
     }
 
-    // AI tidak mengambil alih target manual.
     const manual=+$("#customTarget").value;
     if(Number.isFinite(manual)&&manual>=1200){
       profile.customTarget=Math.round(manual/50)*50;
@@ -1988,20 +2088,15 @@ $("#askAIRecommendation").onclick=async()=>{
 
 $("#profileForm").addEventListener("submit",e=>{
   e.preventDefault();
-  profile.weight=+$("#profileWeight").value||86;
-  profile.height=+$("#profileHeight").value||170;
-  profile.age=+$("#profileAge").value||24;
+  profile.weight=+$("#profileWeight").value||profile.weight||86;
+  profile.height=+$("#profileHeight").value||profile.height||170;
+  profile.age=+$("#profileAge").value||profile.age||24;
   profile.activity=+$("#profileActivity").value||1.55;
   calcProfile({saveRecommendation:false});
   localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));
+  renderProfile();
   renderDashboard();renderStats();toast("Profil dan target disimpan.");
 });
-
-$("#workoutReset").onclick=()=>{
-  const checks=$$(".workout-static-list .workout-check");
-  checks.forEach(c=>{c.checked=false;c.closest(".workout-row")?.classList.remove("done")});
-  localStorage.removeItem(WORKOUT_CHECK_KEY);$$(".workout-check").forEach(c=>{c.checked=false;c.closest(".workout-superset")?.classList.remove("done")});updateWorkoutProgress();updateWorkoutDayCounts();toast("Semua checklist latihan direset.");
-};
 
 /* ---------- ink ripple: purely visual feedback on press, no logic change ---------- */
 const RIPPLE_SELECTOR=".add-btn, .secondary-btn, .theme-btn, .target-option, .mode button, .datebox button, .remove, .workout-day-toggle, .nav button, .mobile-nav button";
@@ -2049,7 +2144,18 @@ document.addEventListener("pointerdown",e=>{
 })();
 
 applyTheme(localStorage.getItem(THEME_KEY)||"light");
-renderProfile();renderDashboard();renderHistory();renderStats();initWorkoutChecklist();
+renderProfile();renderDashboard();renderHistory();renderStats();
+
+/* position the sliding sidebar nav pill once layout has settled, and keep it
+   aligned if the window resizes (sidebar is hidden below 900px, guarded inside) */
+requestAnimationFrame(()=>{
+  const activeBtn=$(".sidebar .nav button.active");
+  moveNavPill($("#navPill").parentElement, $("#navPill"), activeBtn);
+});
+window.addEventListener("resize",()=>{
+  const activeBtn=$(".sidebar .nav button.active");
+  if(activeBtn) moveNavPill($("#navPill").parentElement, $("#navPill"), activeBtn);
+});
 </script>
 </body>
 </html>
