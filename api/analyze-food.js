@@ -274,12 +274,28 @@ function normalizeData(data) {
 async function analyzeFood(req, res) {
   try {
 
+    // CORS untuk website dan Android Capacitor
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET,POST,OPTIONS"
+    );
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type"
+    );
+
+    if (req.method === "OPTIONS") {
+      return res.status(200).end();
+    }
+
     if (!API_KEY || !ai) {
       return res.status(500).json({
         error:
           "GEMINI_API_KEY belum diset di Vercel Environment Variables."
       });
     }
+
 
     const description =
       String(
